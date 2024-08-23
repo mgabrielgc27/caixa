@@ -13,17 +13,18 @@ function App() {
     { rotulo: 'Valor inicial', valor: 'VI' }
   ]
 
+  var saldo = 0;
   const [historico, setHistorico] = useState([])
-  const [dataOperação, setDataOperação] = useState(new Date().toLocaleString())
   const [tipoOperação, setTipoOperação] = useState('')
   const [valorOperação, setValorOperação] = useState('')
-  const [saldo, setSaldo] = useState('1000')
+  // const [saldo, setSaldo] = useState('1000') //remover
 
   function inicializar() {
+    saldo = calcularSaldo()
     const historicoTemp = []
 
     historicoTemp.push({
-      data: dataOperação,
+      data: new Date().toLocaleString(),
       tipo: tiposOperação[2].rotulo,
       valor: '1000'
     })
@@ -31,9 +32,26 @@ function App() {
     setHistorico(historicoTemp)
   }
 
+  function calcularSaldo() {
+
+
+
+
+    for (let index = 0; index < historico.length; index++) {
+      if (historico[index].tipo != 'SQ') {
+        saldo += parseFloat(historico[index].valor)
+      } else {
+        saldo -= parseFloat(historico[index].valor)
+      }
+    }
+
+
+
+    return saldo
+  }
+
   useEffect(() => {
     inicializar()
-    console.log(historico)
   }, [])
 
   useEffect(() => {
@@ -41,53 +59,34 @@ function App() {
     setValorOperação('')
   }, [tipoOperação])
 
+  function realizarOperação() {
 
-  function sacar() {
-    console.log('sacou')
-    if(valorOperação == 0){
-      alert('Digite um valor diferente de zero')
+
+    if (isNaN(valorOperação)) {
+      alert('Valor inválido')
       setValorOperação('')
       return
     }
-    if(valorOperação > saldo){
+
+    if (valorOperação <= 0) {
+      alert('Digite um valor válido')
+      setValorOperação('')
+      return
+    }
+
+    if (tipoOperação == 'SQ' && valorOperação > saldo) {
       alert('Saque ultrapassou o valor do saldo, tente um valor menor')
       setValorOperação('')
       return
     }
 
-    
-    setSaldo(saldo-valorOperação)
-    setDataOperação(new Date().toLocaleString())
+    saldo = calcularSaldo();
 
     const historicoTemp = historico
 
     historicoTemp.push({
-      data: dataOperação,
-      tipo: tiposOperação[1].rotulo,
-      valor: valorOperação
-    })
-
-    setHistorico(historicoTemp)
-    setValorOperação('')
-  }
-
-  function depositar() {
-    console.log('depositou')
-    if(valorOperação == 0){
-      alert('Digite um valor diferente de zero')
-      setValorOperação('')
-      return
-    }
-
-    
-    setSaldo(parseFloat(saldo)+parseFloat(valorOperação))
-    setDataOperação(new Date().toLocaleString())
-
-    const historicoTemp = historico
-
-    historicoTemp.push({
-      data: dataOperação,
-      tipo: tiposOperação[0].rotulo,
+      data: new Date().toLocaleString(),
+      tipo: tipoOperação,
       valor: valorOperação
     })
 
@@ -97,58 +96,53 @@ function App() {
 
   return (
     <>
-      <div className='bg-body-tertiary'>
-        <div className='container'>
-          <div className='row'>
-            <div className='col-4'>
-              <h1 className='text-center'>Saldo = {saldo}</h1>
+      <header style={{width: '70%'}} className='container text-center p-3 my-3 bg-primary text-white rounded-4 shadow-sm shadow w-220px'>
+        <h1>Caixa Eletrônico</h1>
+        <h2>Saldo: R${calcularSaldo().toFixed(2)}</h2>
+      </header>
+      
+      <div className='container'>
+        <div className='px-2'>
+          <div style={{ width: "40%" }} className='container rounded-3 shadow w-220px px-2'>
+            <div className='bg-light rounded-3'>
+              
+            </div>
+            <Select
+              Nome="Tipo de Operação"
+              Id="tipo-operação"
+              value={tipoOperação}
+              opções={tiposOperação.filter(o => o.valor != 'VI')}
+              onChange={e => setTipoOperação(e.target.value)} />
 
-              <Select
-                Nome="Tipo de Operação"
-                Id="tipo-operação"
-                value={tipoOperação}
-                opções={tiposOperação.filter(o => o.valor != 'VI')}
-                onChange={e => setTipoOperação(e.target.value)} />
+            <div className="d-flex gap-2 justify-content-center py-3">
+              {tipoOperação == 'SQ' && <Input
+                Nome="Saque"
+                Id="saque"
+                value={valorOperação}
+                placeholder="Digite o valor do saque"
+                onChange={e => setValorOperação(e.target.value)} />}
 
-              {tipoOperação == 'SQ' &&
-                <div className="d-flex gap-2 justify-content-center py-5">
+              {tipoOperação == 'DP' && <Input
+                Nome="Depósito"
+                Id="deposito"
+                value={valorOperação}
+                placeholder="Digite o valor do depósito"
+                onChange={e => setValorOperação(e.target.value)} />}
 
-                  <Input
-                    Nome=""
-                    Id="saque"
-                    value={valorOperação}
-                    placeholder="Digite a quantidade do saque"
-                    onChange={e => setValorOperação(e.target.value)} />
-
-
-
-                  <Button
-                    tipoBotao="btn btn-danger btn-sm"
-                    onClick={sacar}>
-                    Sacar
-                  </Button>
-
-                </div>}
-
-              {tipoOperação == 'DP' &&
-
-                <div className="d-flex gap-2 justify-content-center py-5">
-                  <Input
-                    Nome=""
-                    Id="deposito"
-                    value={valorOperação}
-                    placeholder="Digite a quantidade do depósito"
-                    onChange={e => setValorOperação(e.target.value)} />
-
-                  <Button
-                    tipoBotao="btn btn-danger btn-sm"
-                    onClick={depositar}>
-                    Depositar
-                  </Button>
-                </div>}
+              <div className='py-5'>
+                {tipoOperação && <Button
+                  tipoBotao="btn btn-danger"
+                  onClick={realizarOperação}>
+                  {tipoOperação == 'SQ' ? 'Sacar' : 'Depositar'}
+                </Button>}
+              </div>
 
             </div>
-            <div className='col-8'>
+
+          </div>
+
+          <div className='container px-5'>
+            <div>
               <h1 className='text-center'>Histórico</h1>
               <Table>
                 <thead>
@@ -163,8 +157,8 @@ function App() {
                     return (
                       <tr key={h.data}>
                         <td>{h.data}</td>
-                        <td>{h.tipo}</td>
-                        <td>{h.valor}</td>
+                        <td>{h.tipo == 'SQ' ? tiposOperação[1].rotulo : tiposOperação[0].rotulo}</td>
+                        <td>R${parseFloat(h.valor).toFixed(2)}</td>
                       </tr>
                     )
                   })}
