@@ -12,8 +12,10 @@ export default function select(params) {
             id={params.Id}
             onChange={params.onChange}
             className="form-select" >
-                <option value="">Escolha um tipo de operação</option>
-                {params.opções.map(o => { return (<option key={o.rotulo} value={o.valor}>{o.rotulo}</option>)})}
+                <option value="">{params.primeiroValor}</option>
+                {params.Id == 'tipo-operação' ?
+                params.opções.map(o => { return (<option key={o.Id} value={o.valor}>{o.rotulo}</option>)}) : 
+                params.opções.map(o => { return (<option key={o.nome} value={o.nome}>{o.nome}</option>)})}
             </select>
         </div>
     )
