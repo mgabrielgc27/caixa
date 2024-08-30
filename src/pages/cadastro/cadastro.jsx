@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react'
 import Input from '../../components/input'
 import Table from '../../components/table'
 import Button from '../../components/button'
-import Select from '../../components/select'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
 
 function Cliente() {
 
+  const tiposOperação = [
+    { rotulo: 'Depósito', valor: 'DP' },
+    { rotulo: 'Saque', valor: 'SQ' },
+    { rotulo: 'Valor inicial', valor: 'VI' },
+    { rotulo: 'Transferência crédito', valor: 'TC' },
+    { rotulo: 'Transferência débito', valor: 'TD' }
+  ]
 
   const [listaClientes, setListaClientes] = useState([])
   const [historico, setHistorico] = useState([])
@@ -15,21 +21,15 @@ function Cliente() {
 
   useEffect(() => {
     const clientes = JSON.parse(localStorage.getItem('listaClientes'))
-    if(clientes){
+    if (clientes) {
       setListaClientes(clientes)
     }
     const hist = JSON.parse(localStorage.getItem('historico'))
-    if(hist){
+    if (hist) {
       setHistorico(hist)
     }
   }, [])
-  
 
-  useEffect(() => {
-    localStorage.setItem('listaClientes', JSON.stringify(listaClientes));
-  }, [listaClientes])
-
-  
   function cadastrarCliente() {
 
     const listaFiltrada = listaClientes.filter(lista => lista.nome == nomeCliente)
@@ -49,12 +49,8 @@ function Cliente() {
       nome: nomeCliente
     })
 
-    setListaClientes(clientes)
-    setNomeCliente('')
+    const historicoTemp = historico
 
-    //const historicoTemp = historico
-
-    /*
     historicoTemp.push({
       cliente: nomeCliente,
       data: new Date().toLocaleString(),
@@ -62,14 +58,34 @@ function Cliente() {
       valor: 1000
     })
 
-    setHistorico(historicoTemp)
-    */
+    setHistorico(historicoTemp);
+
+    setListaClientes(clientes)
+    setNomeCliente('')
     localStorage.setItem('listaClientes', JSON.stringify(listaClientes))
+    localStorage.setItem('historico', JSON.stringify(historico))
     alert('Usuário cadastrado')
 
   }
 
-  
+  function calcularSaldo(historicoFiltrado) {
+
+    let saldo = 0;
+
+    for (let index = 0; index < historicoFiltrado.length; index++) {
+      if (historicoFiltrado[index].tipo == 'SQ') {
+        saldo -= parseFloat(historicoFiltrado[index].valor)
+      } else if (historicoFiltrado[index].tipo == 'TD') {
+        saldo -= parseFloat(historicoFiltrado[index].valor)
+      } else {
+        saldo += parseFloat(historicoFiltrado[index].valor)
+      }
+    }
+
+    return saldo.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+  }
+
+
 
   return (
     <div className=''>
@@ -86,7 +102,7 @@ function Cliente() {
 
           <div className='row'>
 
-            <div className='col-lg-4'>
+            <div className='col-lg-5'>
 
               <div className='row bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
@@ -113,13 +129,13 @@ function Cliente() {
 
             </div>
 
-            {listaClientes.length > 0 && <div className='col-lg-8'>
+            {listaClientes.length > 0 && <div className='col-lg-7'>
               <div>
-                <h1 className='text-center'>Clientes</h1>
                 <Table>
                   <thead>
                     <tr>
-                      <th>Nome</th>
+                      <th>Clientes</th>
+                      <th>Saldo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -127,6 +143,7 @@ function Cliente() {
                       return (
                         <tr key={l.nome}>
                           <td>{l.nome}</td>
+                          <td>{calcularSaldo(historico.filter(h => h.cliente == l.nome))}</td>
                         </tr>
                       )
                     })}

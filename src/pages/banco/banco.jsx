@@ -26,15 +26,6 @@ export default function banco() {
   const [seleçãoUsuarioTransferir, setSeleçãoUsuarioTransferir] = useState('')
   const [valorOperação, setValorOperação] = useState('')
 
-  useEffect(() => {
-    console.log(historico)
-    //localStorage.setItem('historico', JSON.stringify(historico))
-  }, [historico])
-
-  useEffect(() => {
-    inicializar()
-  }, [listaClientes])
-  
   
   useEffect(() => {
     const clientes = JSON.parse(localStorage.getItem('listaClientes'))
@@ -54,27 +45,9 @@ export default function banco() {
     setValorOperação('')
   }, [tipoOperação])
 
-  function inicializar(){
-    const histFiltrado = historico.filter(h => h.tipo == 'VI')
-    if(histFiltrado.length >= listaClientes.length){
-      return;
-    } 
-    const historicoTemp = historico
-    console.log(listaClientes.length)
-    for (let index = 0; index < listaClientes.length; index++) {
-      historicoTemp.unshift({
-        cliente: listaClientes[index].nome,
-        data: new Date().toLocaleString(),
-        tipo: tiposOperação[2].valor,
-        valor: 1000
-      })
-      setHistorico(historicoTemp)
-    }
-  }
 
   function calcularSaldo() {
     
-    // modificação
     const historicoFiltrado = historico.filter(h => h.cliente == seleçãoNome)
 
     for (let index = 0; index < historicoFiltrado.length; index++) {
@@ -87,7 +60,7 @@ export default function banco() {
       }
     }
     
-    return saldo
+    return saldo.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
   }
 
   function realizarOperação() {
@@ -180,7 +153,7 @@ export default function banco() {
                     onChange={e => setSeleçãoNome(e.target.value)} />
 
                   {seleçãoNome != '' && <div className='d-flex justify-content-center align-items-center p-2 my-3 text-white rounded shadow-sm bg-primary'>
-                    {seleçãoNome != '' && <h5>Saldo do cliente: R${calcularSaldo().toFixed(2)}</h5>}
+                    {seleçãoNome != '' && <h5>Saldo do cliente: {calcularSaldo()}</h5>}
                   </div>}
                 </div>}
 
@@ -242,8 +215,8 @@ export default function banco() {
                   <thead>
                     <tr>
                       <th>Data</th>
-                      <th>Tipo de Operação</th>
-                      <th>Valor da Operação</th>
+                      <th className='text-center'>Tipo de Operação</th>
+                      <th className='text-end'>Valor da Operação</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -251,11 +224,11 @@ export default function banco() {
                       return (
                         <tr key={h.data}>
                           <td>{h.data}</td>
-                          <td>
+                          <td className='text-center'>
                             {h.tipo == 'SQ' ? tiposOperação[1].rotulo : h.tipo == 'DP' ? tiposOperação[0].rotulo :
                               h.tipo == 'TD' ? tiposOperação[4].rotulo : h.tipo == 'TC' ? tiposOperação[3].rotulo : tiposOperação[2].rotulo}
                           </td>
-                          <td>R${parseFloat(h.valor).toFixed(2)}</td>
+                          <td className='text-end'>{parseFloat(h.valor).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                         </tr>
                       )
                     })}
