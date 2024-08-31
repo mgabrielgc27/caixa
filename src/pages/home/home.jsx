@@ -10,7 +10,7 @@ export default function home() {
         <Header
           titulo='Home'
           icone='fa-solid fa-house' />
-        <div className='text-center bg-dark text-white rounded-4 shadow-sm shadow w-220px p-5'>
+        <div className='text-center bg-white text-primary rounded-4 shadow shadow w-220px p-5'>
           <div className='row'>
             <i class="fa-5x fa-solid fa-door-open mt-5"></i>
 
