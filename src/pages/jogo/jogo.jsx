@@ -7,7 +7,14 @@ import Header from '../../components/header';
 
 export default function jogo() {
 
-    const pontos = [
+    const QUANT_PERGUNTAS_FACEIS = 5
+    const QUANT_PERGUNTAS_INTERMEDIARIAS = 5
+    const QUANT_PERGUNTAS_DIFICEIS = 5
+    const RODADA_FACIL = 2
+    const RODADA_INTERMEDIARIA = 4
+    const RODADA_DIFICIL = 6
+
+    const PONTOS = [
         { acertar: 1000, parar: 0, errar: 0 },
         { acertar: 2000, parar: 1000, errar: 500 },
         { acertar: 3000, parar: 2000, errar: 1000 },
@@ -26,8 +33,14 @@ export default function jogo() {
         { acertar: 1000000, parar: 500000, errar: 0 }
     ]
 
+    const [pontosRodada, setPontosRodada] = useState(0)
     const [rodada, setRodada] = useState(0)
     const [jogando, setJogando] = useState(false)
+    const [cartasIsDisable, setCartasIsDisable] = useState(false)
+    const [convidadosIsDisable, setConvidadosIsDisable] = useState(false)
+    const [pular1IsDisable, setPular1IsDisable] = useState(false)
+    const [pular2IsDisable, setPular2IsDisable] = useState(false)
+    const [pular3IsDisable, setPular3IsDisable] = useState(false)
 
     const [seleçãoNome, setSeleçãoNome] = useState('')
     const [listaClientes, setListaClientes] = useState([])
@@ -57,6 +70,10 @@ export default function jogo() {
     }
 
     function começarJogo() {
+        if (seleçãoNome == '') {
+            alert('Escolha um usuário')
+            return
+        }
         setRodada(rodada + 1)
         setJogando(true)
 
@@ -69,57 +86,163 @@ export default function jogo() {
         embaralharLista(dificeis)
 
         setListaPerguntasFaceis(faceis)
-        setListaPerguntasIntermediarias(dificeis)
-        setListaPerguntasDificeis(intermediarias)
+        setListaPerguntasIntermediarias(intermediarias)
+        setListaPerguntasDificeis(dificeis)
 
         console.log(listaPerguntasFaceis)
 
-        if (faceis.length < 5) {
+        if (faceis.length < QUANT_PERGUNTAS_FACEIS) {
             alert('registre mais perguntas faceis')
             return
         }
 
-        if (intermediarias.length < 5) {
+        if (intermediarias.length < QUANT_PERGUNTAS_INTERMEDIARIAS) {
             alert('registre mais perguntas intermediarias')
             return
         }
 
-        if (dificeis.length < 5) {
+        if (dificeis.length < QUANT_PERGUNTAS_DIFICEIS) {
             alert('registre mais perguntas dificeis')
             return
         }
 
         setPerguntaAtual(faceis[0])
-        console.log(perguntaAtual.pergunta)
 
         alert('Jogando')
-        setSeleçãoNome('')
-    }
-
-    function pararJogo() {
-        setJogando(false)
-        alert('Parou jogo')
     }
 
     function clicarAlternativa1() {
-        alert('alternativa 1')
+        if (perguntaAtual.alternativas[0] == perguntaAtual.resposta) {
+            acertou()
+            return
+        }
+        errou()
+
     }
 
     function clicarAlternativa2() {
-        alert('alternativa 2')
+        if (perguntaAtual.alternativas[1] == perguntaAtual.resposta) {
+            acertou()
+            return
+        }
+        errou()
     }
 
     function clicarAlternativa3() {
-        alert('alternativa 3')
+        if (perguntaAtual.alternativas[2] == perguntaAtual.resposta) {
+            acertou()
+            return
+        }
+        errou()
     }
 
     function clicarAlternativa4() {
-        alert('alternativa 4')
+        if (perguntaAtual.alternativas[3] == perguntaAtual.resposta) {
+            acertou()
+            return
+        }
+        errou()
     }
 
-    function pularPergunta() {
+    function ajudaCartas() {
+        setCartasIsDisable(true)
+        alert('ajuda cartas')
+    }
 
-        alert('pulou')
+    function ajudaConvidados() {
+        setConvidadosIsDisable(true)
+        alert('ajuda convidados')
+    }
+
+    function pularPergunta(botaoPular) {
+        if (botaoPular === 1) {
+            setPular1IsDisable(true)
+        }
+        if (botaoPular === 2) {
+            setPular2IsDisable(true)
+        }
+        if (botaoPular === 3) {
+            setPular3IsDisable(true)
+        }
+
+        let lista = []
+
+        if (rodada <= RODADA_FACIL) {
+            lista = listaPerguntasFaceis
+        } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
+            lista = listaPerguntasIntermediarias
+        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
+            console.log(rodada)
+            lista = listaPerguntasDificeis
+        }
+
+        lista.shift()
+
+        if (rodada <= RODADA_FACIL) {
+            setListaPerguntasFaceis(lista)
+        } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
+            setListaPerguntasIntermediarias(lista)
+        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
+            setListaPerguntasDificeis(lista)
+        }
+
+
+        setPerguntaAtual(lista[0])
+    }
+
+    function acertou() {
+        setRodada(rodada + 1)
+        setPontosRodada(PONTOS[rodada - 1].acertar)
+        alert(rodada)
+        let lista = []
+
+        if (rodada < RODADA_FACIL) {
+            lista = listaPerguntasFaceis
+        } else if (rodada >= RODADA_FACIL && rodada < RODADA_INTERMEDIARIA) {
+            lista = listaPerguntasIntermediarias
+        } else if (rodada >= RODADA_INTERMEDIARIA && rodada < RODADA_DIFICIL) {
+            console.log(rodada)
+            lista = listaPerguntasDificeis
+        } if (rodada >= 6) {
+            alert('VOCÊ GANHOU O JOGO DO MILHÃO')
+            encerrarJogo()
+            return
+        }
+
+        console.log(lista)
+        lista.shift()
+
+        if (rodada < RODADA_FACIL) {
+            setListaPerguntasFaceis(lista)
+        } else if (rodada >= RODADA_FACIL && rodada < RODADA_INTERMEDIARIA) {
+            setListaPerguntasIntermediarias(lista)
+        } else if (rodada >= RODADA_INTERMEDIARIA && rodada < RODADA_DIFICIL) {
+            setListaPerguntasDificeis(lista)
+        }
+
+        setPerguntaAtual(lista[0])
+        alert(`Você ganhou ${PONTOS[rodada-1].acertar} pontos`)
+    }
+
+    function errou() {
+        alert(`Você errou e saiu com ${PONTOS[rodada-1].errar} pontos`)
+        encerrarJogo()
+    }
+
+    function parar() {
+        alert(`Você parou com ${PONTOS[rodada-1].parar} pontos`)
+        encerrarJogo()
+    }
+
+    function encerrarJogo() {
+        setJogando(false)
+        setRodada(0)
+        setCartasIsDisable(false)
+        setConvidadosIsDisable(false)
+        setPular1IsDisable(false)
+        setPular2IsDisable(false)
+        setPular3IsDisable(false)
+        setSeleçãoNome('')
     }
 
     //console.log(listaPerguntasFaceis)
@@ -174,7 +297,7 @@ export default function jogo() {
                                 <div className='d-flex flex-column mt-3'>
                                     <Button
                                         tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
-                                        onClick={pararJogo}>
+                                        onClick={parar}>
                                         <strong>Parar</strong>
                                     </Button>
                                 </div>
@@ -243,8 +366,9 @@ export default function jogo() {
                                     <div className='col-lg-6'>
                                         <div className='d-flex flex-column text-white'>
                                             <Button
+                                                disabled={cartasIsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={pularPergunta}>
+                                                onClick={ajudaCartas}>
                                                 <img style={{ width: 80 }} src="../../public/cards.png" alt="cartas" />Cartas
                                             </Button>
                                         </div>
@@ -253,8 +377,9 @@ export default function jogo() {
                                     <div className='col-lg-6'>
                                         <div className='d-flex flex-column text-white'>
                                             <Button
+                                                disabled={convidadosIsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={pularPergunta}>
+                                                onClick={ajudaConvidados}>
                                                 <i className="text-dark fa-4x fa-solid fa-people-line"></i>Convidados
                                             </Button>
                                         </div>
@@ -267,8 +392,9 @@ export default function jogo() {
                                     <div className='col-lg-4'>
                                         <div className='d-flex flex-column text-white'>
                                             <Button
+                                                disabled={pular1IsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={pularPergunta}>
+                                                onClick={() => pularPergunta(1)}>
                                                 <i className="text-primary fa-3x fa-solid fa-right-long"></i>Pular
                                             </Button>
                                         </div>
@@ -277,8 +403,9 @@ export default function jogo() {
                                     <div className='col-lg-4'>
                                         <div className='d-flex flex-column'>
                                             <Button
+                                                disabled={pular2IsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={pularPergunta}>
+                                                onClick={() => pularPergunta(2)}>
                                                 <i className="text-warning fa-3x fa-solid fa-right-long"></i>Pular
                                             </Button>
                                         </div>
@@ -287,8 +414,9 @@ export default function jogo() {
                                     <div className='col-lg-4'>
                                         <div className='d-flex flex-column text-white'>
                                             <Button
+                                                disabled={pular3IsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={pularPergunta}>
+                                                onClick={() => pularPergunta(3)}>
                                                 <i className="text-danger fa-3x fa-solid fa-right-long"></i>Pular
                                             </Button>
                                         </div>
@@ -302,21 +430,21 @@ export default function jogo() {
 
                                 <div className='col-lg-4'>
                                     <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{pontos[rodada - 1].errar}</h3>
+                                        <h3>{PONTOS[rodada - 1].errar}</h3>
                                         <h3>errar</h3>
                                     </div>
                                 </div>
 
                                 <div className='col-lg-4'>
                                     <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{pontos[rodada - 1].parar}</h3>
+                                        <h3>{PONTOS[rodada - 1].parar}</h3>
                                         <h3>parar</h3>
                                     </div>
                                 </div>
 
                                 <div className='col-lg-4'>
                                     <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{pontos[rodada - 1].acertar}</h3>
+                                        <h3>{PONTOS[rodada - 1].acertar}</h3>
                                         <h3>acertar</h3>
                                     </div>
                                 </div>
