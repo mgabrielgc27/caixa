@@ -26,7 +26,7 @@ export default function menuNav() {
                             </a>
                             <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <Link className='dropdown-item' to={'/perguntas'}>Perguntas</Link>
-                                <li><a className="dropdown-item" href="#">Jogar</a></li>
+                                <Link className='dropdown-item' to={'/jogo'}>Jogo</Link>
                             </ul>
                         </li>
                     </ul>

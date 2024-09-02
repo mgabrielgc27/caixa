@@ -5,6 +5,7 @@ import Cadastro from '../pages/cadastro/cadastro'
 import Banco from '../pages/banco/banco'
 import Home from '../pages/home/home'
 import Perguntas from '../pages/jogo/perguntas'
+import Jogo from '../pages/jogo/jogo'
 
 export default function index() {
 
@@ -24,6 +25,10 @@ export default function index() {
         {
             path: "/perguntas",
             element: <Perguntas/>
+        },
+        {
+            path: "jogo",
+            element: <Jogo/>
         }
     ]);
 

@@ -22,8 +22,16 @@ export default function perguntas() {
     const [resposta, setResposta] = useState('')
     const [dificuldade, setDificuldade] = useState('')
 
+    useEffect(() => {
+      const perguntas = JSON.parse(localStorage.getItem('listaPerguntas'))
+      if(perguntas){
+        setListaPerguntas(perguntas)
+      }
+    }, [])
+    
+
     function cadastrarPergunta() {
-        // adicionar verificação para alternativas n serem iguais
+        
         if (!pergunta) {
             alert('Digite uma pergunta válida')
             return
@@ -65,6 +73,27 @@ export default function perguntas() {
         }
 
         const alternativas = [alternativa1, alternativa2, alternativa3, alternativa4];
+
+        if(alternativas.filter(a => a === alternativa1).length > 1){
+            alert('Alternativa ja existe')
+            return
+        }
+
+        if(alternativas.filter(a => a === alternativa2).length > 1){
+            alert('Alternativa ja existe')
+            return
+        }
+
+        if(alternativas.filter(a => a === alternativa3).length > 1){
+            alert('Alternativa ja existe')
+            return
+        }
+
+        if(alternativas.filter(a => a === alternativa4).length > 1){
+            alert('Alternativa ja existe')
+            return
+        }
+
         if (!alternativas.find(a => a === resposta)) {
             alert('Resposta não confere com as alternativas')
             return
@@ -80,6 +109,7 @@ export default function perguntas() {
         })
 
         setListaPerguntas(listaPerguntasTemp)
+        localStorage.setItem('listaPerguntas', JSON.stringify(listaPerguntas))
         alert('Pergunta cadastrada')
         setPergunta('')
         setAlternativa1('')
@@ -100,7 +130,7 @@ export default function perguntas() {
 
                 <div className='row'>
 
-                    <div className='col-lg-6'>
+                    <div className='col-lg-8'>
 
                         <div className='row bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
@@ -166,8 +196,9 @@ export default function perguntas() {
 
                     </div>
 
-                    <div className='col-lg-6'>
+                    <div className='col-lg-4'>
                         <div>
+                            <h4 className='text-center text-dark'>Quantidade de perguntas</h4>
                             <Table>
                                 <thead>
                                     <tr>
@@ -186,7 +217,7 @@ export default function perguntas() {
                                     </tr>
                                     <tr>
                                         <td>Díficil</td>
-                                        <td>{listaPerguntas.filter(l => l.dificuldade == 'Díficil').length}</td>
+                                        <td>{listaPerguntas.filter(l => l.dificuldade == 'Difícil').length}</td>
                                     </tr>
                                 </tbody>
                             </Table>

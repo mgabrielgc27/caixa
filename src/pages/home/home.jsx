@@ -12,7 +12,7 @@ export default function home() {
           icone='fa-solid fa-house' />
         <div className='text-center bg-white text-primary rounded-4 shadow shadow w-220px p-5'>
           <div className='row'>
-            <i class="fa-5x fa-solid fa-door-open mt-5"></i>
+            <i className="fa-5x fa-solid fa-door-open mt-5"></i>
 
           </div>
           <div className='row'>
