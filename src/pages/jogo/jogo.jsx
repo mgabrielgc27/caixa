@@ -369,7 +369,7 @@ export default function jogo() {
                                                 disabled={cartasIsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
                                                 onClick={ajudaCartas}>
-                                                <img style={{ width: 80 }} src="../../public/cards.png" alt="cartas" />Cartas
+                                                <img style={{ width: 80, marginInline: '50px'}} src="../../public/cards.png" alt="cartas" />Cartas
                                             </Button>
                                         </div>
                                     </div>
