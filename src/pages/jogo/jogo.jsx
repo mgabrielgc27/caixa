@@ -33,6 +33,14 @@ export default function jogo() {
         { acertar: 1000000, parar: 500000, errar: 0 }
     ]
 
+    const tiposOperação = [
+        { rotulo: 'Depósito', valor: 'DP' },
+        { rotulo: 'Saque', valor: 'SQ' },
+        { rotulo: 'Valor inicial', valor: 'VI' },
+        { rotulo: 'Transferência crédito', valor: 'TC' },
+        { rotulo: 'Transferência débito', valor: 'TD' }
+    ]
+
     const [pontosRodada, setPontosRodada] = useState(0)
     const [rodada, setRodada] = useState(0)
     const [jogando, setJogando] = useState(false)
@@ -44,6 +52,7 @@ export default function jogo() {
 
     const [seleçãoNome, setSeleçãoNome] = useState('')
     const [listaClientes, setListaClientes] = useState([])
+    const [historico, setHistorico] = useState([])
 
     const [listaPerguntas, setListaPerguntas] = useState([])
     const [listaPerguntasFaceis, setListaPerguntasFaceis] = useState([])
@@ -60,6 +69,10 @@ export default function jogo() {
         const clientes = JSON.parse(localStorage.getItem('listaClientes'))
         if (clientes) {
             setListaClientes(clientes)
+        }
+        const historico = JSON.parse(localStorage.getItem('historico'))
+        if (historico) {
+            setHistorico(historico)
         }
 
     }, [])
@@ -182,26 +195,7 @@ export default function jogo() {
             setListaPerguntasDificeis(lista)
             setPerguntaAtual(listaPerguntasDificeis[0])
         }
-        /*
-                console.log(lista)
-        
-                
-                console.log('shift pular')
-        
-                console.log(lista)
-        
-        lista.shift()
 
-        if (rodada <= RODADA_FACIL) {
-            setListaPerguntasFaceis(lista)
-        } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
-            setListaPerguntasIntermediarias(lista)
-        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
-            setListaPerguntasDificeis(lista)
-        }
-
-        setPerguntaAtual(lista[0])
-*/
     }
 
     function acertou() {
@@ -232,42 +226,62 @@ export default function jogo() {
             alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
         } if (rodada >= RODADA_DIFICIL) {
             alert('VOCÊ GANHOU O JOGO DO MILHÃO')
-            encerrarJogo()
-        }
-        /*
-                console.log(lista)
-                console.log(listaPerguntasIntermediarias)
-                
-                console.log('shift responder')
-                console.log(lista)
-        
-        //lista.shift()
-
-        if (rodada < RODADA_FACIL) {
-            setListaPerguntasFaceis(lista)
-        } else if (rodada >= RODADA_FACIL && rodada < RODADA_INTERMEDIARIA) {
-            setListaPerguntasIntermediarias(lista)
-        } else if (rodada >= RODADA_INTERMEDIARIA && rodada < RODADA_DIFICIL) {
-            setListaPerguntasDificeis(lista)
+            encerrarJogo('ganhou')
         }
 
-        setPerguntaAtual(lista[0])
-
-        alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
-        */
     }
 
     function errou() {
         alert(`Você errou e saiu com ${PONTOS[rodada - 1].errar} pontos`)
-        encerrarJogo()
+        encerrarJogo('perdeu')
     }
 
     function parar() {
         alert(`Você parou com ${PONTOS[rodada - 1].parar} pontos`)
-        encerrarJogo()
+        encerrarJogo('parou')
     }
 
-    function encerrarJogo() {
+    function encerrarJogo(statusJogo) {
+        if (statusJogo == 'ganhou') {
+            const hist = historico
+
+            hist.push({
+                cliente: seleçãoNome,
+                data: new Date().toLocaleString(),
+                tipo: tiposOperação[0].valor,
+                valor: PONTOS[rodada - 1].acertar
+            })
+
+            setHistorico(hist)
+            localStorage.setItem('historico', JSON.stringify(historico))
+
+        } else if (statusJogo == 'perdeu') {
+            const hist = historico
+
+            hist.push({
+                cliente: seleçãoNome,
+                data: new Date().toLocaleString(),
+                tipo: tiposOperação[0].valor,
+                valor: PONTOS[rodada - 1].errar
+            })
+
+            setHistorico(hist)
+            localStorage.setItem('historico', JSON.stringify(historico))
+
+        } else if (statusJogo == 'parou') {
+            const hist = historico
+
+            hist.push({
+                cliente: seleçãoNome,
+                data: new Date().toLocaleString(),
+                tipo: tiposOperação[0].valor,
+                valor: PONTOS[rodada - 1].parar
+            })
+
+            setHistorico(hist)
+            localStorage.setItem('historico', JSON.stringify(historico))
+
+        }
         setJogando(false)
         setRodada(0)
         setCartasIsDisable(false)
