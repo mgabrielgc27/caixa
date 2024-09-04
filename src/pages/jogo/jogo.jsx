@@ -44,6 +44,7 @@ export default function jogo() {
     const [pontosRodada, setPontosRodada] = useState(0)
     const [rodada, setRodada] = useState(0)
     const [jogando, setJogando] = useState(false)
+    const [alternativasIsDisable, setAlternativasIsDisable] = useState([false, false, false, false])
     const [cartasIsDisable, setCartasIsDisable] = useState(false)
     const [convidadosIsDisable, setConvidadosIsDisable] = useState(false)
     const [pular1IsDisable, setPular1IsDisable] = useState(false)
@@ -158,12 +159,66 @@ export default function jogo() {
 
     function ajudaCartas() {
         setCartasIsDisable(true)
-        alert('ajuda cartas')
+        const numberRandom1 = Math.floor((Math.random() * 4) + 1)
+
+        const indexResposta = perguntaAtual.alternativas.findIndex(a => a === perguntaAtual.resposta)
+        const alternativasIsDisableTemp = alternativasIsDisable.filter((a, index) => index != indexResposta)
+
+        if (numberRandom1 === 1) {
+            alert('Você conseguiu um Rei, nenhuma alternativa será eliminada')
+            return
+
+        } else if (numberRandom1 === 2) {
+            alert('Você conseguiu um Ás, uma alternativa será eliminada')
+
+            const numberRandom2 = Math.floor((Math.random() * 3))
+            console.log(numberRandom2)
+
+            alternativasIsDisableTemp[numberRandom2] = true
+
+        } else if (numberRandom1 === 3) {
+            alert('Você conseguiu um 2, duas alternativas serão eliminadas')
+
+            const numberRandom3 = Math.floor((Math.random() * 3))
+
+            for (let index = 0; index < alternativasIsDisableTemp.length; index++) {
+                if (index !== numberRandom3) {
+                    alternativasIsDisableTemp[index] = true
+                }
+
+            }
+
+        } else if (numberRandom1 === 4) {
+            alert('Você conseguiu um 3, três alternativas serão eliminadas')
+
+            alternativasIsDisableTemp[0] = true
+            alternativasIsDisableTemp[1] = true
+            alternativasIsDisableTemp[2] = true
+        }
+
+        alternativasIsDisableTemp.splice(indexResposta, 0, false)
+        setAlternativasIsDisable(alternativasIsDisableTemp)
     }
 
     function ajudaConvidados() {
         setConvidadosIsDisable(true)
-        alert('ajuda convidados')
+
+        let percentage1 = Math.floor((Math.random()*99)+1);
+        let percentage2 = Math.floor((Math.random()*99)+1);
+        let percentage3 = Math.floor((Math.random()*99)+1);
+
+        // Calcula o total das porcentagens geradas
+        let total = (percentage1 + percentage2 + percentage3 + 5);
+
+        // Ajusta as porcentagens para que a soma seja 1 (ou 100%)
+        percentage1 = (percentage1 / total) * 100;
+        percentage2 = (percentage2 / total) * 100;
+        percentage3 = (percentage3 / total) * 100;
+
+        // A quarta porcentagem é a diferença para 100%
+        let percentage4 = 100 - (percentage1 + percentage2 + percentage3);
+
+        alert(`Alternativa 1: ${percentage1.toFixed(2)}% - Alternativa 2: ${percentage2.toFixed(2)}% - Alternativa 3: ${percentage3.toFixed(2)}% - Alternativa 4: ${percentage4.toFixed(2)}%`)
     }
 
     function pularPergunta(botaoPular) {
@@ -228,6 +283,7 @@ export default function jogo() {
             alert('VOCÊ GANHOU O JOGO DO MILHÃO')
             encerrarJogo('ganhou')
         }
+        setAlternativasIsDisable([false, false, false, false])
 
     }
 
@@ -256,32 +312,38 @@ export default function jogo() {
             localStorage.setItem('historico', JSON.stringify(historico))
 
         } else if (statusJogo == 'perdeu') {
-            const hist = historico
+            if (PONTOS[rodada - 1].errar != 0) {
 
-            hist.push({
-                cliente: seleçãoNome,
-                data: new Date().toLocaleString(),
-                tipo: tiposOperação[0].valor,
-                valor: PONTOS[rodada - 1].errar
-            })
+                const hist = historico
 
-            setHistorico(hist)
-            localStorage.setItem('historico', JSON.stringify(historico))
+                hist.push({
+                    cliente: seleçãoNome,
+                    data: new Date().toLocaleString(),
+                    tipo: tiposOperação[0].valor,
+                    valor: PONTOS[rodada - 1].errar
+                })
+
+                setHistorico(hist)
+                localStorage.setItem('historico', JSON.stringify(historico))
+            }
 
         } else if (statusJogo == 'parou') {
-            const hist = historico
+            if (PONTOS[rodada - 1].parar != 0) {
 
-            hist.push({
-                cliente: seleçãoNome,
-                data: new Date().toLocaleString(),
-                tipo: tiposOperação[0].valor,
-                valor: PONTOS[rodada - 1].parar
-            })
+                const hist = historico
 
-            setHistorico(hist)
-            localStorage.setItem('historico', JSON.stringify(historico))
+                hist.push({
+                    cliente: seleçãoNome,
+                    data: new Date().toLocaleString(),
+                    tipo: tiposOperação[0].valor,
+                    valor: PONTOS[rodada - 1].parar
+                })
 
+                setHistorico(hist)
+                localStorage.setItem('historico', JSON.stringify(historico))
+            }
         }
+        setAlternativasIsDisable([false, false, false, false])
         setJogando(false)
         setRodada(0)
         setCartasIsDisable(false)
@@ -291,10 +353,6 @@ export default function jogo() {
         setPular3IsDisable(false)
         setSeleçãoNome('')
     }
-
-    //console.log(listaPerguntasFaceis)
-    //console.log(listaPerguntasIntermediarias)
-    //console.log(listaPerguntasDificeis)
 
     return (
         <div>
@@ -365,6 +423,7 @@ export default function jogo() {
                             <div className='row'>
                                 <div className='d-flex flex-column mb-3'>
                                     <Button
+                                        disabled={alternativasIsDisable[0]}
                                         tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
                                         onClick={clicarAlternativa1}>
                                         {perguntaAtual.alternativas[0]}
@@ -375,6 +434,7 @@ export default function jogo() {
                             <div className='row'>
                                 <div className='d-flex flex-column mb-3'>
                                     <Button
+                                        disabled={alternativasIsDisable[1]}
                                         tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
                                         onClick={clicarAlternativa2}>
                                         {perguntaAtual.alternativas[1]}
@@ -385,6 +445,7 @@ export default function jogo() {
                             <div className='row'>
                                 <div className='d-flex flex-column mb-3'>
                                     <Button
+                                        disabled={alternativasIsDisable[2]}
                                         tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
                                         onClick={clicarAlternativa3}>
                                         {perguntaAtual.alternativas[2]}
@@ -395,6 +456,7 @@ export default function jogo() {
                             <div className='row'>
                                 <div className='d-flex flex-column mb-3'>
                                     <Button
+                                        disabled={alternativasIsDisable[3]}
                                         tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
                                         onClick={clicarAlternativa4}>
                                         {perguntaAtual.alternativas[3]}
