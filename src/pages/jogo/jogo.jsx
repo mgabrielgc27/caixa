@@ -89,7 +89,6 @@ export default function jogo() {
         setListaPerguntasIntermediarias(intermediarias)
         setListaPerguntasDificeis(dificeis)
 
-        console.log(listaPerguntasFaceis)
 
         if (faceis.length < QUANT_PERGUNTAS_FACEIS) {
             alert('registre mais perguntas faceis')
@@ -168,14 +167,29 @@ export default function jogo() {
         let lista = []
 
         if (rodada <= RODADA_FACIL) {
-            lista = listaPerguntasFaceis
+            lista = [...listaPerguntasFaceis]
+            lista.shift()
+            setListaPerguntasFaceis(lista)
+            setPerguntaAtual(lista[0])
         } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
-            lista = listaPerguntasIntermediarias
+            lista = [...listaPerguntasIntermediarias]
+            lista.shift()
+            setListaPerguntasIntermediarias(lista)
+            setPerguntaAtual(listaPerguntasIntermediarias[0])
         } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
-            console.log(rodada)
-            lista = listaPerguntasDificeis
+            lista = [...listaPerguntasDificeis]
+            lista.shift()
+            setListaPerguntasDificeis(lista)
+            setPerguntaAtual(listaPerguntasDificeis[0])
         }
-
+        /*
+                console.log(lista)
+        
+                
+                console.log('shift pular')
+        
+                console.log(lista)
+        
         lista.shift()
 
         if (rodada <= RODADA_FACIL) {
@@ -186,31 +200,48 @@ export default function jogo() {
             setListaPerguntasDificeis(lista)
         }
 
-
         setPerguntaAtual(lista[0])
+*/
     }
 
     function acertou() {
+
         setRodada(rodada + 1)
         setPontosRodada(PONTOS[rodada - 1].acertar)
-        alert(rodada)
+
+
         let lista = []
 
         if (rodada < RODADA_FACIL) {
-            lista = listaPerguntasFaceis
+            lista = [...listaPerguntasFaceis]
+            lista.shift()
+            setListaPerguntasFaceis(lista)
+            setPerguntaAtual(lista[0])
+            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
         } else if (rodada >= RODADA_FACIL && rodada < RODADA_INTERMEDIARIA) {
-            lista = listaPerguntasIntermediarias
+            lista = [...listaPerguntasIntermediarias]
+            lista.shift()
+            setListaPerguntasIntermediarias(lista)
+            setPerguntaAtual(listaPerguntasIntermediarias[0])
+            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
         } else if (rodada >= RODADA_INTERMEDIARIA && rodada < RODADA_DIFICIL) {
-            console.log(rodada)
-            lista = listaPerguntasDificeis
-        } if (rodada >= 6) {
+            lista = [...listaPerguntasDificeis]
+            lista.shift()
+            setListaPerguntasDificeis(lista)
+            setPerguntaAtual(listaPerguntasDificeis[0])
+            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
+        } if (rodada >= RODADA_DIFICIL) {
             alert('VOCÊ GANHOU O JOGO DO MILHÃO')
             encerrarJogo()
-            return
         }
-
-        console.log(lista)
-        lista.shift()
+        /*
+                console.log(lista)
+                console.log(listaPerguntasIntermediarias)
+                
+                console.log('shift responder')
+                console.log(lista)
+        
+        //lista.shift()
 
         if (rodada < RODADA_FACIL) {
             setListaPerguntasFaceis(lista)
@@ -221,16 +252,18 @@ export default function jogo() {
         }
 
         setPerguntaAtual(lista[0])
-        alert(`Você ganhou ${PONTOS[rodada-1].acertar} pontos`)
+
+        alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
+        */
     }
 
     function errou() {
-        alert(`Você errou e saiu com ${PONTOS[rodada-1].errar} pontos`)
+        alert(`Você errou e saiu com ${PONTOS[rodada - 1].errar} pontos`)
         encerrarJogo()
     }
 
     function parar() {
-        alert(`Você parou com ${PONTOS[rodada-1].parar} pontos`)
+        alert(`Você parou com ${PONTOS[rodada - 1].parar} pontos`)
         encerrarJogo()
     }
 
@@ -288,7 +321,7 @@ export default function jogo() {
                     <div className='row'>
 
                         <div className='col-lg-8 bg-danger text-white border-end border-top border-bottom border-white border-5 rounded-end my-2'>
-                            <h1>{perguntaAtual.pergunta}</h1>
+                            <h1>{rodada + ") "}{perguntaAtual.pergunta}</h1>
                         </div>
 
                         <div className='col-lg-4'>
@@ -369,7 +402,7 @@ export default function jogo() {
                                                 disabled={cartasIsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
                                                 onClick={ajudaCartas}>
-                                                <img style={{ width: 80, marginInline: '50px'}} src="../../public/cards.png" alt="cartas" />Cartas
+                                                <img style={{ width: 80, marginInline: '50px' }} src="../../public/cards.png" alt="cartas" />Cartas
                                             </Button>
                                         </div>
                                     </div>
