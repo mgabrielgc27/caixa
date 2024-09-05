@@ -277,8 +277,11 @@ export default function jogo() {
 
     function passarPergunta() {
 
-        if (rodada <= 1)
+
+
+        if (rodada < 1) {
             return
+        }
 
         let lista = [...listaPerguntasJogo]
         if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
@@ -359,6 +362,81 @@ export default function jogo() {
         setSeleçãoNome('')
     }
 
+    const comprarAjudaCartas = () => {
+
+        if(cartasIsDisable){
+            setCartasIsDisable(false)
+
+            realizarCompraAjuda()
+        }
+
+    }
+
+    const comprarAjudaConvidados = () => {
+
+        if(convidadosIsDisable){
+            setConvidadosIsDisable(false)
+
+            realizarCompraAjuda()
+        }
+
+    }
+
+    const comprarAjudaPulo = () => {
+
+        if (pular1IsDisable) {
+            setPular1IsDisable(false)
+
+            realizarCompraAjuda()
+
+            return
+        } else if (pular2IsDisable) {
+            setPular2IsDisable(false)
+
+            realizarCompraAjuda()
+
+            return
+        } else if (pular3IsDisable) {
+            setPular3IsDisable(false)
+
+            realizarCompraAjuda()
+
+            return
+        }
+
+    }
+
+    const realizarCompraAjuda = () => {
+        const historicoTemp = historico
+        historicoTemp.push({
+            cliente: seleçãoNome,
+            data: new Date().toLocaleString(),
+            tipo: tiposOperação[1].valor,
+            valor: (1000).toLocaleString()
+        })
+        setHistorico(historicoTemp)
+        localStorage.setItem('historico', JSON.stringify(historico))
+    }
+
+    function calcularSaldo() {
+
+        let saldo = 0
+
+        const historicoFiltrado = historico.filter(h => h.cliente == seleçãoNome)
+
+        for (let index = 0; index < historicoFiltrado.length; index++) {
+            if (historicoFiltrado[index].tipo == 'SQ') {
+                saldo -= parseFloat(historicoFiltrado[index].valor)
+            } else if (historicoFiltrado[index].tipo == 'TD') {
+                saldo -= parseFloat(historicoFiltrado[index].valor)
+            } else {
+                saldo += parseFloat(historicoFiltrado[index].valor)
+            }
+        }
+
+        return saldo.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+    }
+
     return (
         <div>
             <Menu></Menu>
@@ -434,185 +512,278 @@ export default function jogo() {
 
                 </div>}
 
-                {jogando && <div className='container bg-primary my-4 rounded shadow'>
+                {jogando && <div className='row'>
 
-                    <div className='row'>
+                    <div className='col-lg-9'>
 
-                        <div className='col-lg-8 bg-danger text-white border-end border-top border-bottom border-white border-5 rounded-end my-2'>
-                            <h5>{perguntaAtual.categoria + " - " + perguntaAtual.dificuldade}</h5>
-                            <h1>{rodada + ") " + perguntaAtual.pergunta}</h1>
-                        </div>
+                        <div className='container bg-primary my-4 rounded shadow'>
 
-                        <div className='col-lg-4'>
+                            <div className='row'>
 
-                            <dir className='row me-4'>
-                                <div className='d-flex flex-column mt-3'>
-                                    <Button
-                                        tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
-                                        onClick={parar}>
-                                        <strong>Parar</strong>
-                                    </Button>
+                                <div className='col-lg-8 bg-danger text-white border-end border-top border-bottom border-white border-5 rounded-end my-2'>
+                                    <h6>{perguntaAtual.categoria + " - " + perguntaAtual.dificuldade}</h6>
+                                    <h2>{rodada + ") " + perguntaAtual.pergunta}</h2>
                                 </div>
-                            </dir>
 
-                            <dir className='row text-white'>
-                                <h1><strong>Ajuda</strong></h1>
-                            </dir>
+                                <div className='col-lg-4'>
+
+                                    <dir className='row me-4'>
+                                        <div className='d-flex flex-column mt-3'>
+                                            <Button
+                                                tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
+                                                onClick={parar}>
+                                                <strong>Parar</strong>
+                                            </Button>
+                                        </div>
+                                    </dir>
+
+                                    <dir className='row text-white'>
+                                        <h1><strong>Ajuda</strong></h1>
+                                    </dir>
+
+                                </div>
+
+                            </div>
+
+                            <div className='row'>
+
+                                <div className='col-lg-7'>
+
+                                    <div className='row'>
+                                        <div className='d-flex flex-column mb-2'>
+                                            <Button
+                                                disabled={alternativasIsDisable[0]}
+                                                tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
+                                                onClick={clicarAlternativa1}>
+                                                {perguntaAtual.alternativas[0]}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className='row'>
+                                        <div className='d-flex flex-column mb-2'>
+                                            <Button
+                                                disabled={alternativasIsDisable[1]}
+                                                tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
+                                                onClick={clicarAlternativa2}>
+                                                {perguntaAtual.alternativas[1]}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className='row'>
+                                        <div className='d-flex flex-column mb-2'>
+                                            <Button
+                                                disabled={alternativasIsDisable[2]}
+                                                tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
+                                                onClick={clicarAlternativa3}>
+                                                {perguntaAtual.alternativas[2]}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className='row'>
+                                        <div className='d-flex flex-column mb-3'>
+                                            <Button
+                                                disabled={alternativasIsDisable[3]}
+                                                tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
+                                                onClick={clicarAlternativa4}>
+                                                {perguntaAtual.alternativas[3]}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div className='col-lg-5'>
+
+
+                                    <div className='container bg-info text-white rounded border border-3 border-white '>
+                                        <div className='row'>
+
+                                            <div className='col-lg-7 text-center'>
+                                                <h6>Cartas</h6>
+                                                <div className='row'>
+                                                    <div className='col-6'>
+                                                        <div className='d-flex flex-column text-white'>
+                                                            <Button
+                                                                disabled={cartasIsDisable}
+                                                                tipoBotao="btn btn-lg btn-info text-white"
+                                                                onClick={ajudaCartas}>
+                                                                <img style={{ width: 35 }} src="../../cartas.png" alt="" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-6'>
+                                                        <div className='d-flex flex-column text-white'>
+                                                            <Button
+                                                                disabled={cartasIsDisable}
+                                                                tipoBotao="btn btn-lg btn-info text-white"
+                                                                onClick={ajudaCartas}>
+                                                                <img style={{ width: 35 }} src="../../cartas.png" alt="" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div className='row'>
+                                                    <div className='col-6'>
+                                                        <div className='d-flex flex-column text-white'>
+                                                            <Button
+                                                                disabled={cartasIsDisable}
+                                                                tipoBotao="btn btn-lg btn-info text-white"
+                                                                onClick={ajudaCartas}>
+                                                                <img style={{ width: 35 }} src="../../cartas.png" alt="" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    <div className='col-6'>
+                                                        <div className='d-flex flex-column text-white'>
+                                                            <Button
+                                                                disabled={cartasIsDisable}
+                                                                tipoBotao="btn btn-lg btn-info text-white"
+                                                                onClick={ajudaCartas}>
+                                                                <img style={{ width: 35 }} src="../../cartas.png" alt="" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div className='col-lg-5'>
+                                                <div className='d-flex flex-column text-white mt-4'>
+                                                    <Button
+                                                        disabled={convidadosIsDisable}
+                                                        tipoBotao="btn btn-sm btn-info text-white"
+                                                        onClick={ajudaConvidados}>
+                                                        <i className="text-dark fa-3x fa-solid fa-people-line"></i>Convidados
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div className='row'>
+
+                                            <div className='col-lg-4'>
+                                                <div className='d-flex flex-column text-white'>
+                                                    <Button
+                                                        disabled={pular1IsDisable}
+                                                        tipoBotao="btn btn-lg btn-info text-white"
+                                                        onClick={() => pularPergunta(1)}>
+                                                        <i className="text-primary fa-3x fa-solid fa-right-long"></i>Pular
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className='col-lg-4'>
+                                                <div className='d-flex flex-column'>
+                                                    <Button
+                                                        disabled={pular2IsDisable}
+                                                        tipoBotao="btn btn-lg btn-info text-white"
+                                                        onClick={() => pularPergunta(2)}>
+                                                        <i className="text-warning fa-3x fa-solid fa-right-long"></i>Pular
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className='col-lg-4'>
+                                                <div className='d-flex flex-column text-white'>
+                                                    <Button
+                                                        disabled={pular3IsDisable}
+                                                        tipoBotao="btn btn-lg btn-info text-white"
+                                                        onClick={() => pularPergunta(3)}>
+                                                        <i className="text-danger fa-3x fa-solid fa-right-long"></i>Pular
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div className='row my-2 text-center text-white'>
+
+                                        <div className='col-lg-4'>
+                                            <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
+                                                <h3>{PONTOS[rodada - 1].errar}</h3>
+                                                <h3>errar</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className='col-lg-4'>
+                                            <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
+                                                <h3>{PONTOS[rodada - 1].parar}</h3>
+                                                <h3>parar</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className='col-lg-4'>
+                                            <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
+                                                <h3>{PONTOS[rodada - 1].acertar}</h3>
+                                                <h3>acertar</h3>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                    <div className='row'>
+                    <div className='col-lg-3'>
 
-                        <div className='col-lg-7'>
-
-                            <div className='row'>
-                                <div className='d-flex flex-column mb-3'>
-                                    <Button
-                                        disabled={alternativasIsDisable[0]}
-                                        tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                        onClick={clicarAlternativa1}>
-                                        {perguntaAtual.alternativas[0]}
-                                    </Button>
-                                </div>
-                            </div>
+                        <div className='container bg-primary my-4 rounded shadow text-center text-white'>
+                            <h2>Comprar Ajuda</h2>
+                            <h3>Saldo no banco: {calcularSaldo()}</h3>
 
                             <div className='row'>
-                                <div className='d-flex flex-column mb-3'>
-                                    <Button
-                                        disabled={alternativasIsDisable[1]}
-                                        tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                        onClick={clicarAlternativa2}>
-                                        {perguntaAtual.alternativas[1]}
-                                    </Button>
-                                </div>
-                            </div>
 
-                            <div className='row'>
-                                <div className='d-flex flex-column mb-3'>
-                                    <Button
-                                        disabled={alternativasIsDisable[2]}
-                                        tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                        onClick={clicarAlternativa3}>
-                                        {perguntaAtual.alternativas[2]}
-                                    </Button>
-                                </div>
-                            </div>
+                                <div className='d-flex flex-column'>
 
-                            <div className='row'>
-                                <div className='d-flex flex-column mb-3'>
-                                    <Button
-                                        disabled={alternativasIsDisable[3]}
-                                        tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                        onClick={clicarAlternativa4}>
-                                        {perguntaAtual.alternativas[3]}
-                                    </Button>
+                                    <div className='d-flex flex-column text-white mt-3 mb-2'>
+                                        <Button
+                                            tipoBotao="btn btn-lg btn-success text-white"
+                                            onClick={comprarAjudaCartas}>
+                                            <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Ajuda Cartas
+                                        </Button>
+                                    </div>
+
+                                    <div className='d-flex flex-column text-white my-2'>
+                                        <Button
+                                            tipoBotao="btn btn-lg btn-success text-white"
+                                            onClick={comprarAjudaConvidados}>
+                                            <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Ajuda Convidados
+                                        </Button>
+                                    </div>
+
+                                    <div className='d-flex flex-column text-white mt-2 mb-3'>
+                                        <Button
+                                            tipoBotao="btn btn-lg btn-success text-white"
+                                            onClick={comprarAjudaPulo}>
+                                            <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Ajuda Pulo
+                                        </Button>
+                                    </div>
+
                                 </div>
+
                             </div>
 
                         </div>
 
-                        <div className='col-lg-5'>
-
-
-                            <div className='container bg-info text-white rounded border border-3 border-white '>
-                                <div className='row'>
-
-                                    <div className='col-lg-6'>
-                                        <div className='d-flex flex-column text-white'>
-                                            <Button
-                                                disabled={cartasIsDisable}
-                                                tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={ajudaCartas}>
-                                                <img style={{ width: 80, marginInline: '25%' }} src="../../cards.png" alt="cartas" />Cartas
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className='col-lg-6'>
-                                        <div className='d-flex flex-column text-white'>
-                                            <Button
-                                                disabled={convidadosIsDisable}
-                                                tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={ajudaConvidados}>
-                                                <i className="text-dark fa-4x fa-solid fa-people-line"></i>Convidados
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div className='row'>
-
-                                    <div className='col-lg-4'>
-                                        <div className='d-flex flex-column text-white'>
-                                            <Button
-                                                disabled={pular1IsDisable}
-                                                tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={() => pularPergunta(1)}>
-                                                <i className="text-primary fa-3x fa-solid fa-right-long"></i>Pular
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className='col-lg-4'>
-                                        <div className='d-flex flex-column'>
-                                            <Button
-                                                disabled={pular2IsDisable}
-                                                tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={() => pularPergunta(2)}>
-                                                <i className="text-warning fa-3x fa-solid fa-right-long"></i>Pular
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className='col-lg-4'>
-                                        <div className='d-flex flex-column text-white'>
-                                            <Button
-                                                disabled={pular3IsDisable}
-                                                tipoBotao="btn btn-lg btn-info text-white"
-                                                onClick={() => pularPergunta(3)}>
-                                                <i className="text-danger fa-3x fa-solid fa-right-long"></i>Pular
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div className='row my-2 text-center text-white'>
-
-                                <div className='col-lg-4'>
-                                    <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{PONTOS[rodada - 1].errar}</h3>
-                                        <h3>errar</h3>
-                                    </div>
-                                </div>
-
-                                <div className='col-lg-4'>
-                                    <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{PONTOS[rodada - 1].parar}</h3>
-                                        <h3>parar</h3>
-                                    </div>
-                                </div>
-
-                                <div className='col-lg-4'>
-                                    <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                        <h3>{PONTOS[rodada - 1].acertar}</h3>
-                                        <h3>acertar</h3>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                        </div>
 
                     </div>
 
                 </div>}
+
+
 
 
             </div>
