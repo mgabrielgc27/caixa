@@ -4,15 +4,16 @@ import Menu from '../../layout/menuNav';
 import Select from '../../components/select';
 import Button from '../../components/button';
 import Header from '../../components/header';
+import Table from '../../components/table';
 
 export default function jogo() {
 
-    const QUANT_PERGUNTAS_FACEIS = 5
-    const QUANT_PERGUNTAS_INTERMEDIARIAS = 5
-    const QUANT_PERGUNTAS_DIFICEIS = 5
-    const RODADA_FACIL = 2
-    const RODADA_INTERMEDIARIA = 4
-    const RODADA_DIFICIL = 6
+    const QUANT_PERGUNTAS_FACEIS = 6
+    const QUANT_PERGUNTAS_INTERMEDIARIAS = 6
+    const QUANT_PERGUNTAS_DIFICEIS = 6
+    const RODADA_FACIL = 3
+    const RODADA_INTERMEDIARIA = 6
+    const RODADA_DIFICIL = 9
 
     const PONTOS = [
         { acertar: 1000, parar: 0, errar: 0 },
@@ -43,7 +44,9 @@ export default function jogo() {
 
     const [pontosRodada, setPontosRodada] = useState(0)
     const [rodada, setRodada] = useState(0)
+    const [pulos, setPulos] = useState(0)
     const [jogando, setJogando] = useState(false)
+    const [confirmandoJogo, setConfirmandoJogo] = useState(false)
     const [alternativasIsDisable, setAlternativasIsDisable] = useState([false, false, false, false])
     const [cartasIsDisable, setCartasIsDisable] = useState(false)
     const [convidadosIsDisable, setConvidadosIsDisable] = useState(false)
@@ -56,9 +59,10 @@ export default function jogo() {
     const [historico, setHistorico] = useState([])
 
     const [listaPerguntas, setListaPerguntas] = useState([])
-    const [listaPerguntasFaceis, setListaPerguntasFaceis] = useState([])
-    const [listaPerguntasDificeis, setListaPerguntasDificeis] = useState([])
-    const [listaPerguntasIntermediarias, setListaPerguntasIntermediarias] = useState([])
+    const [listaPerguntasJogo, setlistaPerguntasJogo] = useState([])
+    //const [listaPerguntasFaceis, setListaPerguntasFaceis] = useState([])
+    //const [listaPerguntasDificeis, setListaPerguntasDificeis] = useState([])
+    //const [listaPerguntasIntermediarias, setListaPerguntasIntermediarias] = useState([])
     const [perguntaAtual, setPerguntaAtual] = useState({})
 
     useEffect(() => {
@@ -78,30 +82,44 @@ export default function jogo() {
 
     }, [])
 
-    function embaralharLista(lista) {
+    useEffect(() => {
+        //console.log(listaPerguntasFaceis)
+        //console.log(listaPerguntasIntermediarias)
+        //console.log(listaPerguntasDificeis)
+        setPontosRodada(PONTOS[rodada].acertar)
+        setTimeout(passarPergunta, 0)
+
+
+    }, [rodada, pulos])
+
+    useEffect(() => {
+        if (listaPerguntasJogo[0]) {
+            setPerguntaAtual(listaPerguntasJogo[0])
+            listaPerguntasJogo[0].foiPerguntada = true
+            console.log(listaPerguntasJogo[0].foiPerguntada)
+        }
+    }, [listaPerguntasJogo])
+
+    const embaralharLista = (lista) => {
         lista.sort(() => Math.random() - 0.5)
         return lista
     }
 
-    function começarJogo() {
+    const verPerguntas = () => {
         if (seleçãoNome == '') {
             alert('Escolha um usuário')
             return
         }
-        setRodada(rodada + 1)
-        setJogando(true)
 
-        const faceis = listaPerguntas.filter(l => l.dificuldade == 'Fácil')
-        const intermediarias = listaPerguntas.filter(l => l.dificuldade == 'Intermédiario')
-        const dificeis = listaPerguntas.filter(l => l.dificuldade == 'Difícil')
+        const faceis = listaPerguntas.filter(l => l.dificuldade == 'FÁCIL')
+        const intermediarias = listaPerguntas.filter(l => l.dificuldade == 'INTERMÉDIARIO')
+        const dificeis = listaPerguntas.filter(l => l.dificuldade == 'DIFÍCIL')
 
         embaralharLista(faceis)
         embaralharLista(intermediarias)
         embaralharLista(dificeis)
 
-        setListaPerguntasFaceis(faceis)
-        setListaPerguntasIntermediarias(intermediarias)
-        setListaPerguntasDificeis(dificeis)
+        setlistaPerguntasJogo([...faceis, ...intermediarias, ...dificeis])
 
 
         if (faceis.length < QUANT_PERGUNTAS_FACEIS) {
@@ -119,8 +137,20 @@ export default function jogo() {
             return
         }
 
-        setPerguntaAtual(faceis[0])
+        setConfirmandoJogo(true)
+    }
 
+    const cancelar = () => {
+        setConfirmandoJogo(false)
+    }
+
+    const começarJogo = () => {
+
+        setConfirmandoJogo(false)
+        setRodada(rodada + 1)
+        setJogando(true)
+
+        setPerguntaAtual(listaPerguntasJogo[0])
         alert('Jogando')
     }
 
@@ -203,22 +233,19 @@ export default function jogo() {
     function ajudaConvidados() {
         setConvidadosIsDisable(true)
 
-        let percentage1 = Math.floor((Math.random()*99)+1);
-        let percentage2 = Math.floor((Math.random()*99)+1);
-        let percentage3 = Math.floor((Math.random()*99)+1);
+        let percentage1 = Math.floor((Math.random() * 99) + 1);
+        let percentage2 = Math.floor((Math.random() * 99) + 1);
+        let percentage3 = Math.floor((Math.random() * 99) + 1);
 
-        // Calcula o total das porcentagens geradas
         let total = (percentage1 + percentage2 + percentage3 + 5);
 
-        // Ajusta as porcentagens para que a soma seja 1 (ou 100%)
         percentage1 = (percentage1 / total) * 100;
         percentage2 = (percentage2 / total) * 100;
         percentage3 = (percentage3 / total) * 100;
 
-        // A quarta porcentagem é a diferença para 100%
         let percentage4 = 100 - (percentage1 + percentage2 + percentage3);
 
-        alert(`Alternativa 1: ${percentage1.toFixed(2)}% - Alternativa 2: ${percentage2.toFixed(2)}% - Alternativa 3: ${percentage3.toFixed(2)}% - Alternativa 4: ${percentage4.toFixed(2)}%`)
+        alert(`Alternativa 1: ${percentage1.toFixed(2)}% - Alternativa 2: ${percentage2.toFixed(2)}%\nAlternativa 3: ${percentage3.toFixed(2)}% - Alternativa 4: ${percentage4.toFixed(2)}%`)
     }
 
     function pularPergunta(botaoPular) {
@@ -232,59 +259,35 @@ export default function jogo() {
             setPular3IsDisable(true)
         }
 
-        let lista = []
-
-        if (rodada <= RODADA_FACIL) {
-            lista = [...listaPerguntasFaceis]
-            lista.shift()
-            setListaPerguntasFaceis(lista)
-            setPerguntaAtual(lista[0])
-        } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
-            lista = [...listaPerguntasIntermediarias]
-            lista.shift()
-            setListaPerguntasIntermediarias(lista)
-            setPerguntaAtual(listaPerguntasIntermediarias[0])
-        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
-            lista = [...listaPerguntasDificeis]
-            lista.shift()
-            setListaPerguntasDificeis(lista)
-            setPerguntaAtual(listaPerguntasDificeis[0])
-        }
+        setPulos(pulos + 1)
 
     }
 
     function acertou() {
 
         setRodada(rodada + 1)
-        setPontosRodada(PONTOS[rodada - 1].acertar)
-
-
-        let lista = []
-
-        if (rodada < RODADA_FACIL) {
-            lista = [...listaPerguntasFaceis]
-            lista.shift()
-            setListaPerguntasFaceis(lista)
-            setPerguntaAtual(lista[0])
-            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
-        } else if (rodada >= RODADA_FACIL && rodada < RODADA_INTERMEDIARIA) {
-            lista = [...listaPerguntasIntermediarias]
-            lista.shift()
-            setListaPerguntasIntermediarias(lista)
-            setPerguntaAtual(listaPerguntasIntermediarias[0])
-            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
-        } else if (rodada >= RODADA_INTERMEDIARIA && rodada < RODADA_DIFICIL) {
-            lista = [...listaPerguntasDificeis]
-            lista.shift()
-            setListaPerguntasDificeis(lista)
-            setPerguntaAtual(listaPerguntasDificeis[0])
-            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
-        } if (rodada >= RODADA_DIFICIL) {
+        setAlternativasIsDisable([false, false, false, false])
+        if (rodada >= RODADA_DIFICIL) {
             alert('VOCÊ GANHOU O JOGO DO MILHÃO')
             encerrarJogo('ganhou')
         }
-        setAlternativasIsDisable([false, false, false, false])
+        alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
 
+    }
+
+    function passarPergunta() {
+
+        if (rodada <= 1)
+            return
+
+        let lista = [...listaPerguntasJogo]
+        if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
+            lista = lista.filter(l => l.dificuldade != 'FÁCIL')
+        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
+            lista = lista.filter(l => l.dificuldade === 'DIFÍCIL')
+        }
+        lista = lista.filter(l => l.foiPerguntada == false)
+        setlistaPerguntasJogo(lista)
     }
 
     function errou() {
@@ -346,6 +349,8 @@ export default function jogo() {
         setAlternativasIsDisable([false, false, false, false])
         setJogando(false)
         setRodada(0)
+        setPulos(0)
+        setlistaPerguntasJogo([])
         setCartasIsDisable(false)
         setConvidadosIsDisable(false)
         setPular1IsDisable(false)
@@ -364,7 +369,7 @@ export default function jogo() {
                     titulo='Show do milhão'
                     icone='fa-solid fa-circle-dollar-to-slot' />
 
-                {!jogando && <div className='d-flex align-items-center justify-content-center'>
+                {!jogando && <div className='d-flex flex-collumn justify-content-center'>
 
                     <div className='col-lg-6 bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
@@ -379,21 +384,63 @@ export default function jogo() {
                         <div className='d-flex flex-column pt-3'>
                             <Button
                                 tipoBotao="btn btn-success"
-                                onClick={começarJogo}>
+                                onClick={verPerguntas}>
                                 Jogar
                             </Button>
                         </div>
 
+                        {confirmandoJogo && <div className='d-flex flex-column pt-2'>
+                            <Button
+                                tipoBotao="btn btn-outline-danger"
+                                onClick={cancelar}>
+                                Cancelar
+                            </Button>
+                        </div>}
+
                     </div>
+
+                    {confirmandoJogo && <div className='bg-white rounded-4 shadow-sm shadow w-220px p-3'>
+
+                        <Table>
+                            <th>Perguntas Nível Fácil</th>
+                            {listaPerguntasJogo.filter(l => l.dificuldade == 'FÁCIL').map((l, index) => {
+                                return (
+                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                )
+                            })}
+                            <th>Perguntas Nível Intermediario</th>
+                            {listaPerguntasJogo.filter(l => l.dificuldade == 'INTERMÉDIARIO').map((l, index) => {
+                                return (
+                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                )
+                            })}
+                            <th>Perguntas Nível Dificil</th>
+                            {listaPerguntasJogo.filter(l => l.dificuldade == 'DIFÍCIL').map((l, index) => {
+                                return (
+                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                )
+                            })}
+                        </Table>
+
+                        <div className='d-flex flex-column pt-3'>
+                            <Button
+                                tipoBotao="btn btn-success"
+                                onClick={começarJogo}>
+                                Começar
+                            </Button>
+                        </div>
+
+                    </div>}
 
                 </div>}
 
-                {jogando && <div className='container bg-primary my-4'>
+                {jogando && <div className='container bg-primary my-4 rounded shadow'>
 
                     <div className='row'>
 
                         <div className='col-lg-8 bg-danger text-white border-end border-top border-bottom border-white border-5 rounded-end my-2'>
-                            <h1>{rodada + ") "}{perguntaAtual.pergunta}</h1>
+                            <h5>{perguntaAtual.categoria + " - " + perguntaAtual.dificuldade}</h5>
+                            <h1>{rodada + ") " + perguntaAtual.pergunta}</h1>
                         </div>
 
                         <div className='col-lg-4'>
@@ -478,7 +525,7 @@ export default function jogo() {
                                                 disabled={cartasIsDisable}
                                                 tipoBotao="btn btn-lg btn-info text-white"
                                                 onClick={ajudaCartas}>
-                                                <img style={{ width: 80, marginInline: '50px' }} src="../../public/cards.png" alt="cartas" />Cartas
+                                                <img style={{ width: 80, marginInline: '25%' }} src="../../cards.png" alt="cartas" />Cartas
                                             </Button>
                                         </div>
                                     </div>

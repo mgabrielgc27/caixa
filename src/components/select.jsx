@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function select(params) {
     return (
-        <div>
+        <div className='py-3'>
             <label
                 htmlFor={params.Id}
                 className='form-label' >
