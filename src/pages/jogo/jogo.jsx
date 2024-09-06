@@ -8,12 +8,12 @@ import Table from '../../components/table';
 
 export default function jogo() {
 
-    const QUANT_PERGUNTAS_FACEIS = 6
-    const QUANT_PERGUNTAS_INTERMEDIARIAS = 6
-    const QUANT_PERGUNTAS_DIFICEIS = 6
-    const RODADA_FACIL = 3
-    const RODADA_INTERMEDIARIA = 6
-    const RODADA_DIFICIL = 9
+    const QUANT_PERGUNTAS_FACEIS = 13
+    const QUANT_PERGUNTAS_INTERMEDIARIAS = 7
+    const QUANT_PERGUNTAS_DIFICEIS = 5
+    const RODADA_FACIL = 10
+    const RODADA_INTERMEDIARIA = 14
+    const RODADA_DIFICIL = 16
 
     const PONTOS = [
         { acertar: 1000, parar: 0, errar: 0 },
@@ -42,17 +42,19 @@ export default function jogo() {
         { rotulo: 'Transferência débito', valor: 'TD' }
     ]
 
-    const [pontosRodada, setPontosRodada] = useState(0)
+    const modosJogo = [
+        "Modo normal", "Modo treinamento", "Categoria matemática", "Categoria português", "Categoria conhecimentos gerais"
+    ]
+
     const [rodada, setRodada] = useState(0)
     const [pulos, setPulos] = useState(0)
+    const [modoJogo, setModoJogo] = useState('')
     const [jogando, setJogando] = useState(false)
     const [confirmandoJogo, setConfirmandoJogo] = useState(false)
     const [alternativasIsDisable, setAlternativasIsDisable] = useState([false, false, false, false])
     const [cartasIsDisable, setCartasIsDisable] = useState(false)
     const [convidadosIsDisable, setConvidadosIsDisable] = useState(false)
-    const [pular1IsDisable, setPular1IsDisable] = useState(false)
-    const [pular2IsDisable, setPular2IsDisable] = useState(false)
-    const [pular3IsDisable, setPular3IsDisable] = useState(false)
+    const [pularIsDisable, setPularIsDisable] = useState([false,false,false])
 
     const [seleçãoNome, setSeleçãoNome] = useState('')
     const [listaClientes, setListaClientes] = useState([])
@@ -60,9 +62,6 @@ export default function jogo() {
 
     const [listaPerguntas, setListaPerguntas] = useState([])
     const [listaPerguntasJogo, setlistaPerguntasJogo] = useState([])
-    //const [listaPerguntasFaceis, setListaPerguntasFaceis] = useState([])
-    //const [listaPerguntasDificeis, setListaPerguntasDificeis] = useState([])
-    //const [listaPerguntasIntermediarias, setListaPerguntasIntermediarias] = useState([])
     const [perguntaAtual, setPerguntaAtual] = useState({})
 
     useEffect(() => {
@@ -83,12 +82,7 @@ export default function jogo() {
     }, [])
 
     useEffect(() => {
-        //console.log(listaPerguntasFaceis)
-        //console.log(listaPerguntasIntermediarias)
-        //console.log(listaPerguntasDificeis)
-        setPontosRodada(PONTOS[rodada].acertar)
         setTimeout(passarPergunta, 0)
-
 
     }, [rodada, pulos])
 
@@ -99,6 +93,11 @@ export default function jogo() {
             console.log(listaPerguntasJogo[0].foiPerguntada)
         }
     }, [listaPerguntasJogo])
+
+    useEffect(() => {
+        cancelar()
+    }, [modoJogo, seleçãoNome])
+
 
     const embaralharLista = (lista) => {
         lista.sort(() => Math.random() - 0.5)
@@ -111,16 +110,34 @@ export default function jogo() {
             return
         }
 
-        const faceis = listaPerguntas.filter(l => l.dificuldade == 'FÁCIL')
-        const intermediarias = listaPerguntas.filter(l => l.dificuldade == 'INTERMÉDIARIO')
-        const dificeis = listaPerguntas.filter(l => l.dificuldade == 'DIFÍCIL')
+        if (modoJogo == '') {
+            alert('Escolha um modo')
+            return
+        }
+
+        let faceis = listaPerguntas.filter(l => l.dificuldade == 'FÁCIL')
+        let intermediarias = listaPerguntas.filter(l => l.dificuldade == 'INTERMEDIÁRIO')
+        let dificeis = listaPerguntas.filter(l => l.dificuldade == 'DIFÍCIL')
+
+        if (modoJogo == 'Categoria matemática') {
+            faceis = faceis.filter(l => l.categoria === "MATEMÁTICA")
+            intermediarias = intermediarias.filter(l => l.categoria === "MATEMÁTICA")
+            dificeis = dificeis.filter(l => l.categoria === "MATEMÁTICA")
+        } else if (modoJogo == 'Categoria português') {
+            faceis = faceis.filter(l => l.categoria === "PORTUGUÊS")
+            intermediarias = intermediarias.filter(l => l.categoria === "PORTUGUÊS")
+            dificeis = dificeis.filter(l => l.categoria === "PORTUGUÊS")
+        } else if (modoJogo == 'Categoria conhecimentos gerais') {
+            faceis = faceis.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
+            intermediarias = intermediarias.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
+            dificeis = dificeis.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
+        }
 
         embaralharLista(faceis)
         embaralharLista(intermediarias)
         embaralharLista(dificeis)
 
         setlistaPerguntasJogo([...faceis, ...intermediarias, ...dificeis])
-
 
         if (faceis.length < QUANT_PERGUNTAS_FACEIS) {
             alert('registre mais perguntas faceis')
@@ -188,7 +205,9 @@ export default function jogo() {
     }
 
     function ajudaCartas() {
-        setCartasIsDisable(true)
+        if (modoJogo != 'Modo treinamento')
+            setCartasIsDisable(true);
+
         const numberRandom1 = Math.floor((Math.random() * 4) + 1)
 
         const indexResposta = perguntaAtual.alternativas.findIndex(a => a === perguntaAtual.resposta)
@@ -231,7 +250,8 @@ export default function jogo() {
     }
 
     function ajudaConvidados() {
-        setConvidadosIsDisable(true)
+        if (modoJogo != 'Modo treinamento')
+            setConvidadosIsDisable(true);
 
         let percentage1 = Math.floor((Math.random() * 99) + 1);
         let percentage2 = Math.floor((Math.random() * 99) + 1);
@@ -250,13 +270,25 @@ export default function jogo() {
 
     function pularPergunta(botaoPular) {
         if (botaoPular === 1) {
-            setPular1IsDisable(true)
+            if (modoJogo != 'Modo treinamento'){
+                const pular = pularIsDisable
+                pular[0] = true
+                setPularIsDisable(pular)
+            }
         }
         if (botaoPular === 2) {
-            setPular2IsDisable(true)
+            if (modoJogo != 'Modo treinamento'){
+                const pular = pularIsDisable
+                pular[1] = true
+                setPularIsDisable(pular)
+            }
         }
         if (botaoPular === 3) {
-            setPular3IsDisable(true)
+            if (modoJogo != 'Modo treinamento'){
+                const pular = pularIsDisable
+                pular[2] = true
+                setPularIsDisable(pular)
+            }
         }
 
         setPulos(pulos + 1)
@@ -266,19 +298,20 @@ export default function jogo() {
     function acertou() {
 
         setRodada(rodada + 1)
-        setAlternativasIsDisable([false, false, false, false])
+        
         if (rodada >= RODADA_DIFICIL) {
             alert('VOCÊ GANHOU O JOGO DO MILHÃO')
             encerrarJogo('ganhou')
         }
-        alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`)
+        if (modoJogo != "Modo treinamento")
+            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`);
+        else
+            alert('Você acertou')
 
     }
 
     function passarPergunta() {
-
-
-
+        setAlternativasIsDisable([false, false, false, false])
         if (rodada < 1) {
             return
         }
@@ -294,59 +327,36 @@ export default function jogo() {
     }
 
     function errou() {
-        alert(`Você errou e saiu com ${PONTOS[rodada - 1].errar} pontos`)
-        encerrarJogo('perdeu')
+        if (modoJogo != 'Modo treinamento') {
+            alert(`Você errou e saiu com ${PONTOS[rodada - 1].errar} pontos`)
+            encerrarJogo('perdeu')
+        } else {
+            alert('Você errou')
+            setRodada(rodada + 1)
+        }
     }
 
     function parar() {
-        alert(`Você parou com ${PONTOS[rodada - 1].parar} pontos`)
+        if (modoJogo != 'Modo treinamento')
+            alert(`Você parou com ${PONTOS[rodada - 1].parar} pontos`);
+
         encerrarJogo('parou')
     }
 
     function encerrarJogo(statusJogo) {
-        if (statusJogo == 'ganhou') {
-            const hist = historico
+        if (modoJogo != 'Modo treinamento') {
+            if (statusJogo == 'ganhou') {
+                realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].acertar)
 
-            hist.push({
-                cliente: seleçãoNome,
-                data: new Date().toLocaleString(),
-                tipo: tiposOperação[0].valor,
-                valor: PONTOS[rodada - 1].acertar
-            })
+            } else if (statusJogo == 'perdeu') {
+                if (PONTOS[rodada - 1].errar != 0) {
+                    realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].errar)
+                }
 
-            setHistorico(hist)
-            localStorage.setItem('historico', JSON.stringify(historico))
-
-        } else if (statusJogo == 'perdeu') {
-            if (PONTOS[rodada - 1].errar != 0) {
-
-                const hist = historico
-
-                hist.push({
-                    cliente: seleçãoNome,
-                    data: new Date().toLocaleString(),
-                    tipo: tiposOperação[0].valor,
-                    valor: PONTOS[rodada - 1].errar
-                })
-
-                setHistorico(hist)
-                localStorage.setItem('historico', JSON.stringify(historico))
-            }
-
-        } else if (statusJogo == 'parou') {
-            if (PONTOS[rodada - 1].parar != 0) {
-
-                const hist = historico
-
-                hist.push({
-                    cliente: seleçãoNome,
-                    data: new Date().toLocaleString(),
-                    tipo: tiposOperação[0].valor,
-                    valor: PONTOS[rodada - 1].parar
-                })
-
-                setHistorico(hist)
-                localStorage.setItem('historico', JSON.stringify(historico))
+            } else if (statusJogo == 'parou') {
+                if (PONTOS[rodada - 1].parar != 0) {
+                    realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].parar)
+                }
             }
         }
         setAlternativasIsDisable([false, false, false, false])
@@ -356,63 +366,60 @@ export default function jogo() {
         setlistaPerguntasJogo([])
         setCartasIsDisable(false)
         setConvidadosIsDisable(false)
-        setPular1IsDisable(false)
-        setPular2IsDisable(false)
-        setPular3IsDisable(false)
+        setPularIsDisable([false,false,false])
         setSeleçãoNome('')
     }
 
     const comprarAjudaCartas = () => {
 
-        if(cartasIsDisable){
+        if (cartasIsDisable) {
             setCartasIsDisable(false)
 
-            realizarCompraAjuda()
+            realizarOperação(tiposOperação[1].valor, '1000')
         }
 
     }
 
     const comprarAjudaConvidados = () => {
 
-        if(convidadosIsDisable){
+        if (convidadosIsDisable) {
             setConvidadosIsDisable(false)
 
-            realizarCompraAjuda()
+            realizarOperação(tiposOperação[1].valor, '1000')
         }
 
     }
 
     const comprarAjudaPulo = () => {
 
-        if (pular1IsDisable) {
-            setPular1IsDisable(false)
-
-            realizarCompraAjuda()
-
-            return
-        } else if (pular2IsDisable) {
-            setPular2IsDisable(false)
-
-            realizarCompraAjuda()
-
-            return
-        } else if (pular3IsDisable) {
-            setPular3IsDisable(false)
-
-            realizarCompraAjuda()
-
+        if (pularIsDisable[0]) {
+            const pular = pularIsDisable
+            pular[0] = false
+            setPularIsDisable(pular)
+        } else if (pularIsDisable[1]) {
+            const pular = pularIsDisable
+            pular[0] = false
+            setPularIsDisable(pular)
+        } else if (pularIsDisable[2]) {
+            const pular = pularIsDisable
+            pular[0] = false
+            setPularIsDisable(pular)
+        } else {
+            alert('Todos os pulos estão disponiveis')
             return
         }
 
+        realizarOperação(tiposOperação[1].valor, '1000')
+
     }
 
-    const realizarCompraAjuda = () => {
+    const realizarOperação = (tipo, valor) => {
         const historicoTemp = historico
         historicoTemp.push({
             cliente: seleçãoNome,
             data: new Date().toLocaleString(),
-            tipo: tiposOperação[1].valor,
-            valor: (1000).toLocaleString()
+            tipo: tipo,
+            valor: valor
         })
         setHistorico(historicoTemp)
         localStorage.setItem('historico', JSON.stringify(historico))
@@ -449,7 +456,12 @@ export default function jogo() {
 
                 {!jogando && <div className='d-flex flex-collumn justify-content-center'>
 
+
                     <div className='col-lg-6 bg-white rounded-4 shadow-sm shadow w-220px p-3'>
+
+                        <Table>
+
+                        </Table>
 
                         <Select
                             Nome="Selecionar cliente"
@@ -459,21 +471,37 @@ export default function jogo() {
                             opções={listaClientes}
                             onChange={e => setSeleçãoNome(e.target.value)} />
 
+                        {seleçãoNome && <Select
+                            Nome="Selecionar modo de jogo"
+                            Id="selecionar-modo-jogo"
+                            value={modoJogo}
+                            primeiroValor='Escolha o usuário'
+                            opções={modosJogo}
+                            onChange={e => setModoJogo(e.target.value)} />}
+
                         <div className='d-flex flex-column pt-3'>
                             <Button
-                                tipoBotao="btn btn-success"
+                                tipoBotao="btn btn-primary"
                                 onClick={verPerguntas}>
-                                Jogar
+                                Ver Perguntas
                             </Button>
                         </div>
 
-                        {confirmandoJogo && <div className='d-flex flex-column pt-2'>
+                        {confirmandoJogo && <><div className='d-flex flex-column mt-2'>
+                            <Button
+                                tipoBotao="btn btn-success"
+                                onClick={começarJogo}>
+                                Começar
+                            </Button>
+                        </div>
+
+                        <div className='d-flex flex-column mt-2'>
                             <Button
                                 tipoBotao="btn btn-outline-danger"
                                 onClick={cancelar}>
                                 Cancelar
                             </Button>
-                        </div>}
+                        </div></>}
 
                     </div>
 
@@ -483,30 +511,22 @@ export default function jogo() {
                             <th>Perguntas Nível Fácil</th>
                             {listaPerguntasJogo.filter(l => l.dificuldade == 'FÁCIL').map((l, index) => {
                                 return (
-                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
                                 )
                             })}
                             <th>Perguntas Nível Intermediario</th>
-                            {listaPerguntasJogo.filter(l => l.dificuldade == 'INTERMÉDIARIO').map((l, index) => {
+                            {listaPerguntasJogo.filter(l => l.dificuldade == 'INTERMEDIÁRIO').map((l, index) => {
                                 return (
-                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
                                 )
                             })}
                             <th>Perguntas Nível Dificil</th>
                             {listaPerguntasJogo.filter(l => l.dificuldade == 'DIFÍCIL').map((l, index) => {
                                 return (
-                                    <tr>{index + 1} - {l.pergunta}</tr>
+                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
                                 )
                             })}
                         </Table>
-
-                        <div className='d-flex flex-column pt-3'>
-                            <Button
-                                tipoBotao="btn btn-success"
-                                onClick={começarJogo}>
-                                Começar
-                            </Button>
-                        </div>
 
                     </div>}
 
@@ -670,7 +690,7 @@ export default function jogo() {
                                             <div className='col-lg-4'>
                                                 <div className='d-flex flex-column text-white'>
                                                     <Button
-                                                        disabled={pular1IsDisable}
+                                                        disabled={pularIsDisable[0]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
                                                         onClick={() => pularPergunta(1)}>
                                                         <i className="text-primary fa-3x fa-solid fa-right-long"></i>Pular
@@ -681,7 +701,7 @@ export default function jogo() {
                                             <div className='col-lg-4'>
                                                 <div className='d-flex flex-column'>
                                                     <Button
-                                                        disabled={pular2IsDisable}
+                                                        disabled={pularIsDisable[1]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
                                                         onClick={() => pularPergunta(2)}>
                                                         <i className="text-warning fa-3x fa-solid fa-right-long"></i>Pular
@@ -692,7 +712,7 @@ export default function jogo() {
                                             <div className='col-lg-4'>
                                                 <div className='d-flex flex-column text-white'>
                                                     <Button
-                                                        disabled={pular3IsDisable}
+                                                        disabled={pularIsDisable[2]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
                                                         onClick={() => pularPergunta(3)}>
                                                         <i className="text-danger fa-3x fa-solid fa-right-long"></i>Pular
@@ -708,22 +728,22 @@ export default function jogo() {
 
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                                <h3>{PONTOS[rodada - 1].errar}</h3>
-                                                <h3>errar</h3>
+                                                {modoJogo != 'Modo treinamento' ?
+                                                    <><h3>{PONTOS[rodada - 1].errar}</h3><h3>errar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                                <h3>{PONTOS[rodada - 1].parar}</h3>
-                                                <h3>parar</h3>
+                                                {modoJogo != 'Modo treinamento' ?
+                                                    <><h3>{PONTOS[rodada - 1].errar}</h3><h3>parar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
-                                                <h3>{PONTOS[rodada - 1].acertar}</h3>
-                                                <h3>acertar</h3>
+                                                {modoJogo != 'Modo treinamento' ?
+                                                    <><h3>{PONTOS[rodada - 1].errar}</h3><h3>acertar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
@@ -738,7 +758,7 @@ export default function jogo() {
 
                     </div>
 
-                    <div className='col-lg-3'>
+                    {modoJogo != 'Modo treinamento' && <div className='col-lg-3'>
 
                         <div className='container bg-primary my-4 rounded shadow text-center text-white'>
                             <h2>Comprar Ajuda</h2>
@@ -766,6 +786,7 @@ export default function jogo() {
 
                                     <div className='d-flex flex-column text-white mt-2 mb-3'>
                                         <Button
+                                            disabled={pulos < 6 ? false : true}
                                             tipoBotao="btn btn-lg btn-success text-white"
                                             onClick={comprarAjudaPulo}>
                                             <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Ajuda Pulo
@@ -778,13 +799,9 @@ export default function jogo() {
 
                         </div>
 
-
-                    </div>
+                    </div>}
 
                 </div>}
-
-
-
 
             </div>
 
