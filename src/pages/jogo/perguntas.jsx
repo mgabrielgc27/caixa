@@ -141,7 +141,7 @@ export default function perguntas() {
     }
 
     const inicializarPerguntasDefault = () => {
-        const lista = [
+        // const lista = [
             // {
             //   "pergunta": "2 + 2 é igual a?",
             //   "alternativas": ["1", "2", "3", "4"],
@@ -1335,18 +1335,18 @@ export default function perguntas() {
             //   "dificuldade": "DIFÍCIL",
             //   "foiPerguntada": false
             // }
-            {
-              "pergunta": "Quem foi o líder da Revolução Russa de 1917?",
-              "alternativas": ["Leon Trotsky", "Vladimir Lenin", "Joseph Stalin", "Mikhail Gorbachev"],
-              "resposta": "Vladimir Lenin",
-              "categoria": "CONHECIMENTOS GERAIS",
-              "dificuldade": "DIFÍCIL",
-              "foiPerguntada": false
-            }
-        ]
+        //     {
+        //       "pergunta": "Quem foi o líder da Revolução Russa de 1917?",
+        //       "alternativas": ["Leon Trotsky", "Vladimir Lenin", "Joseph Stalin", "Mikhail Gorbachev"],
+        //       "resposta": "Vladimir Lenin",
+        //       "categoria": "CONHECIMENTOS GERAIS",
+        //       "dificuldade": "DIFÍCIL",
+        //       "foiPerguntada": false
+        //     }
+        // ]
 
-        const lista2 = [...listaPerguntas,...lista]
-        localStorage.setItem('listaPerguntas',JSON.stringify(lista2))
+        // const lista2 = [...listaPerguntas,...lista]
+        // localStorage.setItem('listaPerguntas',JSON.stringify(lista2))
     }
 
     return (

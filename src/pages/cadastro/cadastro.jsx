@@ -4,6 +4,7 @@ import Table from '../../components/table'
 import Button from '../../components/button'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
+import { calcularSaldo } from '../../service/banco'
 
 function Cliente() {
 
@@ -12,8 +13,9 @@ function Cliente() {
     { rotulo: 'Saque', valor: 'SQ' },
     { rotulo: 'Valor inicial', valor: 'VI' },
     { rotulo: 'Transferência crédito', valor: 'TC' },
-    { rotulo: 'Transferência débito', valor: 'TD' }
-  ]
+    { rotulo: 'Transferência débito', valor: 'TD' },
+    { rotulo: 'Compra', valor: 'CP'}
+]
 
   const [listaClientes, setListaClientes] = useState([])
   const [historico, setHistorico] = useState([])
@@ -53,7 +55,7 @@ function Cliente() {
 
     historicoTemp.push({
       cliente: nomeCliente,
-      data: new Date().toLocaleString(),
+      data: new Date().toLocaleDateString(),
       tipo: tiposOperação[2].valor,
       valor: 1000
     })
@@ -67,25 +69,6 @@ function Cliente() {
     alert('Usuário cadastrado')
 
   }
-
-  function calcularSaldo(historicoFiltrado) {
-
-    let saldo = 0;
-
-    for (let index = 0; index < historicoFiltrado.length; index++) {
-      if (historicoFiltrado[index].tipo == 'SQ') {
-        saldo -= parseFloat(historicoFiltrado[index].valor)
-      } else if (historicoFiltrado[index].tipo == 'TD') {
-        saldo -= parseFloat(historicoFiltrado[index].valor)
-      } else {
-        saldo += parseFloat(historicoFiltrado[index].valor)
-      }
-    }
-
-    return saldo.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
-  }
-
-
 
   return (
     <div className=''>
@@ -143,7 +126,7 @@ function Cliente() {
                       return (
                         <tr key={l.nome}>
                           <td>{l.nome}</td>
-                          <td>{calcularSaldo(historico.filter(h => h.cliente == l.nome))}</td>
+                          <td>{calcularSaldo(historico.filter(h => h.cliente == l.nome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                         </tr>
                       )
                     })}

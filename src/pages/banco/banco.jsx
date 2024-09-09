@@ -6,6 +6,7 @@ import Button from '../../components/button'
 import Select from '../../components/select'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
+import { calcularSaldo, filtrarHistoricoPorData } from '../../service/banco'
 
 export default function banco() {
 
@@ -14,10 +15,9 @@ export default function banco() {
     { rotulo: 'Saque', valor: 'SQ' },
     { rotulo: 'Valor inicial', valor: 'VI' },
     { rotulo: 'Transferência crédito', valor: 'TC' },
-    { rotulo: 'Transferência débito', valor: 'TD' }
+    { rotulo: 'Transferência débito', valor: 'TD' },
+    { rotulo: 'Compra', valor: 'CP' }
   ]
-
-  let saldo = 0
 
   const [listaClientes, setListaClientes] = useState([])
   const [historico, setHistorico] = useState([])
@@ -26,42 +26,24 @@ export default function banco() {
   const [seleçãoUsuarioTransferir, setSeleçãoUsuarioTransferir] = useState('')
   const [valorOperação, setValorOperação] = useState('')
 
-  
+
   useEffect(() => {
     const clientes = JSON.parse(localStorage.getItem('listaClientes'))
-    if(clientes){
+    if (clientes) {
       setListaClientes(clientes)
     }
 
     const hist = JSON.parse(localStorage.getItem('historico'))
-    if(hist){
+    if (hist) {
       setHistorico(hist)
     }
-    
+
   }, [])
-  
+
   useEffect(() => {
 
     setValorOperação('')
   }, [tipoOperação])
-
-
-  function calcularSaldo() {
-    
-    const historicoFiltrado = historico.filter(h => h.cliente == seleçãoNome)
-
-    for (let index = 0; index < historicoFiltrado.length; index++) {
-      if (historicoFiltrado[index].tipo == 'SQ') {
-        saldo -= parseFloat(historicoFiltrado[index].valor)
-      } else if (historicoFiltrado[index].tipo == 'TD') {
-        saldo -= parseFloat(historicoFiltrado[index].valor)
-      } else {
-        saldo += parseFloat(historicoFiltrado[index].valor)
-      }
-    }
-    
-    return saldo.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
-  }
 
   function realizarOperação() {
 
@@ -84,20 +66,19 @@ export default function banco() {
       return
     }
 
-    if (tipoOperação == 'SQ' && valorOperação > saldo) {
+
+    if (tipoOperação == 'SQ' && valorOperação > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
       alert('Saldo insuficiente')
       setValorOperação('')
       return
     }
-
-    saldo = calcularSaldo();
 
     const historicoTemp = historico
 
 
     historicoTemp.push({
       cliente: seleçãoNome,
-      data: new Date().toLocaleString(),
+      data: new Date().toLocaleDateString(),
       tipo: tipoOperação,
       valor: valorOperação
     })
@@ -105,7 +86,7 @@ export default function banco() {
     if (tipoOperação == 'TD') {
       historicoTemp.push({
         cliente: seleçãoUsuarioTransferir,
-        data: new Date().toLocaleString(),
+        data: new Date().toLocaleDateString(),
         tipo: tiposOperação[3].valor,
         valor: valorOperação
       })
@@ -153,7 +134,7 @@ export default function banco() {
                     onChange={e => setSeleçãoNome(e.target.value)} />
 
                   {seleçãoNome != '' && <div className='d-flex justify-content-center align-items-center p-2 my-3 text-white rounded shadow-sm bg-primary'>
-                    {seleçãoNome != '' && <h5>Saldo do cliente: {calcularSaldo()}</h5>}
+                    {seleçãoNome != '' && <h5>Saldo do cliente: {calcularSaldo(historico.filter(h => h.cliente == seleçãoNome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</h5>}
                   </div>}
                 </div>}
 
@@ -163,7 +144,7 @@ export default function banco() {
                     Nome="Tipo de Operação"
                     Id="tipo-operação"
                     value={tipoOperação}
-                    opções={tiposOperação.filter(o => o.valor != 'VI' && o.valor != 'TC')}
+                    opções={tiposOperação.filter(o => o.valor != 'VI' && o.valor != 'TC' && o.valor != 'CP')}
                     primeiroValor='Escolha um tipo de operação'
                     onChange={e => setTipoOperação(e.target.value)} />
                 </div>}
@@ -211,29 +192,38 @@ export default function banco() {
             {seleçãoNome != '' && <div className='col-lg-8'>
               <div>
                 <h1 className='text-center'>Histórico de operações de {seleçãoNome}</h1>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th className='text-center'>Tipo de Operação</th>
-                      <th className='text-end'>Valor da Operação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historico.filter(h => h.cliente == seleçãoNome).map(h => {
-                      return (
-                        <tr key={h.data}>
-                          <td>{h.data}</td>
-                          <td className='text-center'>
-                            {h.tipo == 'SQ' ? tiposOperação[1].rotulo : h.tipo == 'DP' ? tiposOperação[0].rotulo :
-                              h.tipo == 'TD' ? tiposOperação[4].rotulo : h.tipo == 'TC' ? tiposOperação[3].rotulo : tiposOperação[2].rotulo}
-                          </td>
-                          <td className='text-end'>{parseFloat(h.valor).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                {filtrarHistoricoPorData(historico.filter(h => h.cliente == seleçãoNome)).map(([data, transações]) => (
+                  <div key={data}>
+                    <h3>{data}</h3>
+                    <Table>
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Valor</th>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                </Table>
+                      </thead>
+                      <tbody>
+                        {transações.map((t, index) => (
+                          <tr key={index}>
+                            <td>{t.tipo == 'DP' ?
+                                  tiposOperação[0].rotulo :
+                                  t.tipo == 'SQ' ?
+                                      tiposOperação[1].rotulo :
+                                      t.tipo == 'VI' ?
+                                        tiposOperação[2].rotulo :
+                                        t.tipo == 'TC' ?
+                                          tiposOperação[3].rotulo :
+                                          t.tipo == 'TD' ?
+                                            tiposOperação[4].rotulo : tiposOperação[5].rotulo}
+                            </td>
+                            <td>{t.valor}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ))
+                }
               </div>
             </div>}
 
