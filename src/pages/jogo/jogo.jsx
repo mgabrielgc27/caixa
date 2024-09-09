@@ -450,10 +450,10 @@ export default function jogo() {
 
                     <div className='col-lg-6 bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
-                        {<div>
+                        {pontuaçãoParticipantes.length > 0 && <div className='row'><div className='col-lg-6'>
                             <Table>
                                 <thead>
-                                    <tr><th>Ranking de pontos</th></tr>
+                                    <tr><th>Ranking</th></tr>
                                 </thead>
                                 <tbody>
                                     {organizarRanking(pontuaçãoParticipantes).map(p => {
@@ -463,6 +463,23 @@ export default function jogo() {
                                     })}
                                 </tbody>
                             </Table>
+                        </div>
+                        <div className='col-lg-6'>
+                            <Table>
+                                <thead>
+                                    <tr>
+                                        <th>Historico de pontuações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pontuaçãoParticipantes.map(p => {
+                                        return (
+                                            <tr><td>{p.nome}: {p.pontos}</td></tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </Table>
+                        </div>
                         </div>}
 
                         <Select
@@ -536,7 +553,7 @@ export default function jogo() {
 
                 {jogando && <div className='row'>
 
-                    <div className='col-lg-9'>
+                    <div className='col-lg-12'>
 
                         <div className='container bg-primary my-4 rounded shadow'>
 
