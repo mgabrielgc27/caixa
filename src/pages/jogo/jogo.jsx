@@ -59,6 +59,10 @@ export default function jogo() {
     const [cartasIsDisable, setCartasIsDisable] = useState(false)
     const [convidadosIsDisable, setConvidadosIsDisable] = useState(false)
     const [pularIsDisable, setPularIsDisable] = useState([false, false, false])
+    const [perguntaAleatoria, setPerguntaAleatoria] = useState({})
+    const [numeroRodadaAleatoria, setNumeroRodadaAleatoria] = useState(0)
+    const [pontuaçãoPerguntaAleatoria, setPontuaçãoPerguntaAleatoria] = useState(0)
+    const [isPerguntaAleatoria, setIsPerguntaAleatoria] = useState(false)
 
     const [seleçãoNome, setSeleçãoNome] = useState('')
     const [listaClientes, setListaClientes] = useState([])
@@ -90,18 +94,39 @@ export default function jogo() {
     }, [])
 
     useEffect(() => {
-        console.log(listaPerguntasJogo)
+        if (rodada === numeroRodadaAleatoria && rodada != 0) {
+            setIsPerguntaAleatoria(true)
+            console.log(isPerguntaAleatoria)
+            let index = 0
+            if (rodada > 0 && rodada <= RODADA_FACIL) {
+                index = Math.floor(Math.random() * (listaPerguntasJogo.filter(l => l.dificuldade === 'FÁCIL').length - 1) + 1)
+            } else if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
+                index = Math.floor(Math.random() * (listaPerguntasJogo.filter(l => l.dificuldade === 'INTERMEDIÁRIO').length - 1) + 1)
+            } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
+                index = Math.floor(Math.random() * (listaPerguntasJogo.filter(l => l.dificuldade === 'DIFÍCIL').length - 1) + 1)
+            }
+            setPerguntaAleatoria(listaPerguntasJogo[index])
+            const lista = listaPerguntasJogo.filter(p => p != perguntaAleatoria)
+            setlistaPerguntasJogo(lista)
+        }
         setTimeout(passarPergunta, 0)
 
     }, [rodada, pulos])
 
+
+
     useEffect(() => {
+        if (rodada === numeroRodadaAleatoria) {
+            console.log('Pergunta aleatoria', perguntaAleatoria)
+            setPerguntaAtual(perguntaAleatoria)
+            return
+        }
         if (listaPerguntasJogo[0]) {
             setPerguntaAtual(listaPerguntasJogo[0])
             listaPerguntasJogo[0].foiPerguntada = true
-            console.log(listaPerguntasJogo[0].foiPerguntada)
         }
     }, [listaPerguntasJogo])
+
 
     useEffect(() => {
         cancelar()
@@ -109,7 +134,10 @@ export default function jogo() {
 
 
     const embaralharLista = (lista) => {
-        lista.sort(() => Math.random() - 0.5)
+        for (let i = lista.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [lista[i], lista[j]] = [lista[j], lista[i]];
+        }
         return lista
     }
 
@@ -123,6 +151,17 @@ export default function jogo() {
             alert('Escolha um modo')
             return
         }
+
+        setConfirmandoJogo(true)
+
+        const number = Math.floor((Math.random() * (RODADA_DIFICIL - 1)) + 1)
+        setNumeroRodadaAleatoria(number)
+
+        inicializandoPerguntasJogo()
+
+    }
+
+    const inicializandoPerguntasJogo = () => {
 
         let faceis = listaPerguntas.filter(l => l.dificuldade == 'FÁCIL')
         let intermediarias = listaPerguntas.filter(l => l.dificuldade == 'INTERMEDIÁRIO')
@@ -162,8 +201,6 @@ export default function jogo() {
             alert('registre mais perguntas dificeis')
             return
         }
-
-        setConfirmandoJogo(true)
     }
 
     const cancelar = () => {
@@ -281,6 +318,9 @@ export default function jogo() {
     }
 
     function acertou() {
+        if(rodada === numeroRodadaAleatoria){
+            setPontuaçãoPerguntaAleatoria(PONTOS[numeroRodadaAleatoria - 1].acertar)
+        }
 
         setRodada(rodada + 1)
 
@@ -289,7 +329,7 @@ export default function jogo() {
             encerrarJogo('ganhou')
         }
         if (modoJogo != "Modo treinamento")
-            alert(`Você ganhou ${PONTOS[rodada - 1].acertar} pontos`);
+            alert(`Você ganhou ${(PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria)} pontos`);
         else
             alert('Você acertou')
 
@@ -313,7 +353,7 @@ export default function jogo() {
 
     function errou() {
         if (modoJogo != 'Modo treinamento') {
-            alert(`Você errou e saiu com ${PONTOS[rodada - 1].errar} pontos`)
+            alert(`Você errou e saiu com ${(PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria)} pontos`)
             encerrarJogo('perdeu')
         } else {
             alert('Você errou')
@@ -323,7 +363,7 @@ export default function jogo() {
 
     function parar() {
         if (modoJogo != 'Modo treinamento')
-            alert(`Você parou com ${PONTOS[rodada - 1].parar} pontos`);
+            alert(`Você parou com ${(PONTOS[rodada - 1].parar + pontuaçãoPerguntaAleatoria)} pontos`);
 
         encerrarJogo('parou')
     }
@@ -332,18 +372,18 @@ export default function jogo() {
         if (modoJogo != 'Modo treinamento') {
             if (statusJogo == 'ganhou') {
                 guardarPontuaçãoParticipante(PONTOS[rodada - 1].acertar)
-                realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].acertar)
+                realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria))
 
             } else if (statusJogo == 'perdeu') {
                 if (PONTOS[rodada - 1].errar != 0) {
                     guardarPontuaçãoParticipante(PONTOS[rodada - 1].errar)
-                    realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].errar)
+                    realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria))
                 }
 
             } else if (statusJogo == 'parou') {
                 if (PONTOS[rodada - 1].parar != 0) {
                     guardarPontuaçãoParticipante(PONTOS[rodada - 1].parar)
-                    realizarOperação(tiposOperação[0].valor, PONTOS[rodada - 1].parar)
+                    realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].parar + pontuaçãoPerguntaAleatoria))
                 }
             }
         }
@@ -363,7 +403,7 @@ export default function jogo() {
         if (cartasIsDisable) {
             setCartasIsDisable(false)
 
-            if(1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))){
+            if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
                 alert('Saldo insuficiente')
                 return
             }
@@ -378,7 +418,7 @@ export default function jogo() {
         if (convidadosIsDisable) {
             setConvidadosIsDisable(false)
 
-            if(1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))){
+            if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
                 alert('Saldo insuficiente')
                 return
             }
@@ -395,8 +435,6 @@ export default function jogo() {
             nome: seleçãoNome,
             pontos: pontuação
         })
-
-        console.log(pontosParticipantes)
 
         setPontuaçãoParticipantes(pontosParticipantes)
         localStorage.setItem('pontuaçãoParticipantes', JSON.stringify(pontuaçãoParticipantes))
@@ -415,7 +453,6 @@ export default function jogo() {
 
         }, {})
 
-        console.log(Object.entries(rankingObj))
         const rankingList = Object.entries(rankingObj)
             .map(([nome, pontos]) => ({ nome, pontos }))
             .sort((a, b) => b.pontos - a.pontos);
@@ -435,6 +472,16 @@ export default function jogo() {
         localStorage.setItem('historico', JSON.stringify(historico))
     }
 
+    const aceitarPerguntaAleatoria = () => {
+        setIsPerguntaAleatoria(false)
+    }
+
+    const pularPerguntaAleatoria = () => {
+        setNumeroRodadaAleatoria(0)
+        setIsPerguntaAleatoria(false)
+        pularPergunta(0)
+    }
+
     return (
         <div>
             <Menu></Menu>
@@ -450,36 +497,41 @@ export default function jogo() {
 
                     <div className='col-lg-6 bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
-                        {pontuaçãoParticipantes.length > 0 && <div className='row'><div className='col-lg-6'>
-                            <Table>
-                                <thead>
-                                    <tr><th>Ranking</th></tr>
-                                </thead>
-                                <tbody>
-                                    {organizarRanking(pontuaçãoParticipantes).map(p => {
-                                        return (
-                                            <tr><td>{p.nome}: {p.pontos}</td></tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </Table>
-                        </div>
-                        <div className='col-lg-6'>
-                            <Table>
-                                <thead>
-                                    <tr>
-                                        <th>Historico de pontuações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pontuaçãoParticipantes.map(p => {
-                                        return (
-                                            <tr><td>{p.nome}: {p.pontos}</td></tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </Table>
-                        </div>
+                        {pontuaçãoParticipantes.length > 0 && <div className='row'>
+                            <div className='col-lg-6'>
+                                <div className="table-responsive" style={{ maxHeight: '164px', overflowY: 'auto' }}>
+                                    <Table>
+                                        <thead>
+                                            <tr><th>Ranking</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {organizarRanking(pontuaçãoParticipantes).map(p => {
+                                                return (
+                                                    <tr key={p.nome}><td>{p.nome}: {p.pontos}</td></tr>
+                                                )
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </div>
+                            <div className='col-lg-6'>
+                                <div className="table-responsive" style={{ maxHeight: '164px', overflowY: 'auto' }}>
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th>Historico de pontuações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {pontuaçãoParticipantes.map((p, index) => {
+                                                return (
+                                                    <tr key={index}><td>{p.nome}: {p.pontos}</td></tr>
+                                                )
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </div>
                         </div>}
 
                         <Select
@@ -524,27 +576,44 @@ export default function jogo() {
 
                     </div>
 
-                    {confirmandoJogo && <div className='bg-white rounded-4 shadow-sm shadow w-220px p-3'>
+                    {confirmandoJogo && <div style={{ maxWidth: '538px',maxHeight: '544px', overflowY: 'auto' }} className='bg-white rounded-4 shadow-sm shadow w-220px p-3 table-responsive'>
+                        <h2>Rodada da pergunta aleátoria: {numeroRodadaAleatoria}</h2>
 
                         <Table>
-                            <th>Perguntas Nível Fácil</th>
-                            {listaPerguntasJogo.filter(l => l.dificuldade == 'FÁCIL').map((l, index) => {
-                                return (
-                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
-                                )
-                            })}
-                            <th>Perguntas Nível Intermediario</th>
-                            {listaPerguntasJogo.filter(l => l.dificuldade == 'INTERMEDIÁRIO').map((l, index) => {
-                                return (
-                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
-                                )
-                            })}
-                            <th>Perguntas Nível Dificil</th>
-                            {listaPerguntasJogo.filter(l => l.dificuldade == 'DIFÍCIL').map((l, index) => {
-                                return (
-                                    <tr>{index + 1} - {l.pergunta} - {l.categoria}</tr>
-                                )
-                            })}
+                            <thead>
+                                <tr><th>Perguntas Nível Fácil</th></tr>
+                            </thead>
+                            <tbody>
+                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'FÁCIL').map((l, index) => {
+                                    return (
+                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
+                                    )
+                                })}
+                            </tbody>
+                        </Table>
+                        <Table>
+                            <thead>
+                                <tr><th>Perguntas Nível Intermediario</th></tr>
+                            </thead>
+                            <tbody>
+                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'INTERMEDIÁRIO').map((l, index) => {
+                                    return (
+                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
+                                    )
+                                })}
+                            </tbody>
+                        </Table>
+                        <Table>
+                            <thead>
+                                <tr><th>Perguntas Nível Dificil</th></tr>
+                            </thead>
+                            <tbody>
+                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'DIFÍCIL').map((l, index) => {
+                                    return (
+                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
+                                    )
+                                })}
+                            </tbody>
                         </Table>
 
                     </div>}
@@ -555,7 +624,33 @@ export default function jogo() {
 
                     <div className='col-lg-12'>
 
-                        <div className='container bg-primary my-4 rounded shadow'>
+                        {isPerguntaAleatoria && <div className='container bg-primary my-4 rounded shadow'>
+                            <div className='row text-center'>
+                                <h1>Você deseja responder uma pergunta aleatoria e ganhar o dobro da pontuação desta rodada?</h1>
+                            </div>
+                            <div className='row text-center'>
+                                <div className='col-lg-6'>
+                                    <div className='d-flex flex-column mt-3'>
+                                        <Button
+                                            tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
+                                            onClick={aceitarPerguntaAleatoria}>
+                                            <strong>Sim</strong>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className='col-lg-6'>
+                                    <div className='d-flex flex-column mt-3'>
+                                        <Button
+                                            tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
+                                            onClick={pularPerguntaAleatoria}>
+                                            <strong>Não</strong>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>}
+
+                        {!isPerguntaAleatoria && <div className='container bg-primary my-4 rounded shadow'>
 
                             <div className='row'>
 
@@ -773,11 +868,11 @@ export default function jogo() {
 
                             </div>
 
-                        </div>
+                        </div>}
 
                     </div>
 
-                    {modoJogo != 'Modo treinamento' && <div className='col-lg-3'>
+                    {(!isPerguntaAleatoria && modoJogo != 'Modo treinamento') && <div className='col-lg-3'>
 
                         <div className='container bg-primary my-4 rounded shadow text-center text-white'>
                             <h2>Comprar Ajuda</h2>
