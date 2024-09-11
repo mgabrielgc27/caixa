@@ -318,7 +318,7 @@ export default function jogo() {
     }
 
     function acertou() {
-        if(rodada === numeroRodadaAleatoria){
+        if (rodada === numeroRodadaAleatoria) {
             setPontuaçãoPerguntaAleatoria(PONTOS[numeroRodadaAleatoria - 1].acertar)
         }
 
@@ -371,19 +371,22 @@ export default function jogo() {
     function encerrarJogo(statusJogo) {
         if (modoJogo != 'Modo treinamento') {
             if (statusJogo == 'ganhou') {
-                guardarPontuaçãoParticipante(PONTOS[rodada - 1].acertar)
-                realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria))
+                const pontos = PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria;
+                guardarPontuaçãoParticipante(pontos)
+                realizarOperação(tiposOperação[0].valor, pontos)
 
             } else if (statusJogo == 'perdeu') {
                 if (PONTOS[rodada - 1].errar != 0) {
-                    guardarPontuaçãoParticipante(PONTOS[rodada - 1].errar)
-                    realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria))
+                    const pontos = PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria
+                    guardarPontuaçãoParticipante(pontos)
+                    realizarOperação(tiposOperação[0].valor, pontos)
                 }
 
             } else if (statusJogo == 'parou') {
                 if (PONTOS[rodada - 1].parar != 0) {
-                    guardarPontuaçãoParticipante(PONTOS[rodada - 1].parar)
-                    realizarOperação(tiposOperação[0].valor, (PONTOS[rodada - 1].parar + pontuaçãoPerguntaAleatoria))
+                    const pontos = PONTOS[rodada - 1].parar + pontuaçãoParticipantes
+                    guardarPontuaçãoParticipante(pontos)
+                    realizarOperação(tiposOperação[0].valor, pontos)
                 }
             }
         }
@@ -464,7 +467,7 @@ export default function jogo() {
         const historicoTemp = historico
         historicoTemp.push({
             cliente: seleçãoNome,
-            data: new Date().toLocaleDateString(),
+            data: new Date(),
             tipo: tipo,
             valor: valor
         })
@@ -576,7 +579,7 @@ export default function jogo() {
 
                     </div>
 
-                    {confirmandoJogo && <div style={{ maxWidth: '538px',maxHeight: '544px', overflowY: 'auto' }} className='bg-white rounded-4 shadow-sm shadow w-220px p-3 table-responsive'>
+                    {confirmandoJogo && <div style={{ maxWidth: '538px', maxHeight: '544px', overflowY: 'auto' }} className='bg-white rounded-4 shadow-sm shadow w-220px p-3 table-responsive'>
                         <h2>Rodada da pergunta aleátoria: {numeroRodadaAleatoria}</h2>
 
                         <Table>

@@ -5,6 +5,7 @@ import Button from '../../components/button'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
 import { calcularSaldo } from '../../service/banco'
+import { cadastrarCliente } from '../../service/cadastro'
 
 function Cliente() {
 
@@ -31,44 +32,6 @@ function Cliente() {
       setHistorico(hist)
     }
   }, [])
-
-  function cadastrarCliente() {
-
-    const listaFiltrada = listaClientes.filter(lista => lista.nome == nomeCliente)
-    if (listaFiltrada.length > 0) {
-      alert('Usuário existente')
-      return
-    }
-
-    if (!nomeCliente) {
-      alert('Digite um nome válido')
-      return
-    }
-
-    const clientes = listaClientes
-
-    clientes.push({
-      nome: nomeCliente
-    })
-
-    const historicoTemp = historico
-
-    historicoTemp.push({
-      cliente: nomeCliente,
-      data: new Date().toLocaleDateString(),
-      tipo: tiposOperação[2].valor,
-      valor: 1000
-    })
-
-    setHistorico(historicoTemp);
-
-    setListaClientes(clientes)
-    setNomeCliente('')
-    localStorage.setItem('listaClientes', JSON.stringify(listaClientes))
-    localStorage.setItem('historico', JSON.stringify(historico))
-    alert('Usuário cadastrado')
-
-  }
 
   return (
     <div className=''>
@@ -102,7 +65,8 @@ function Cliente() {
                 <div className='d-flex flex-column'>
                   <Button
                     tipoBotao="btn btn-success"
-                    onClick={cadastrarCliente}>
+                    onClick={() => cadastrarCliente(
+                      listaClientes, nomeCliente, historico, tiposOperação, setHistorico, setListaClientes, setNomeCliente)}>
                     Cadastrar
                   </Button>
 

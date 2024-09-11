@@ -6,7 +6,7 @@ import Button from '../../components/button'
 import Select from '../../components/select'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
-import { calcularSaldo, filtrarHistoricoPorData } from '../../service/banco'
+import { calcularSaldo, filtrarHistoricoPorData, verificarInputs, cancelarOperação } from '../../service/banco'
 
 export default function banco() {
 
@@ -25,7 +25,6 @@ export default function banco() {
   const [tipoOperação, setTipoOperação] = useState('')
   const [seleçãoUsuarioTransferir, setSeleçãoUsuarioTransferir] = useState('')
   const [valorOperação, setValorOperação] = useState('')
-
 
   useEffect(() => {
     const clientes = JSON.parse(localStorage.getItem('listaClientes'))
@@ -47,61 +46,38 @@ export default function banco() {
 
   function realizarOperação() {
 
+    try {
+      const saldo = calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))
 
-    if (isNaN(valorOperação)) {
-      alert('Valor inválido')
-      setValorOperação('')
-      return
-    }
+      verificarInputs(saldo, valorOperação, setValorOperação, tipoOperação)
 
-    if (valorOperação <= 0) {
-      alert('Digite um valor válido')
-      setValorOperação('')
-      return
-    }
+      const historicoTemp = historico
 
-    if (tipoOperação == 'TD' && valorOperação > saldo) {
-      alert('Saldo insuficiente')
-      setValorOperação('')
-      return
-    }
-
-
-    if (tipoOperação == 'SQ' && valorOperação > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
-      alert('Saldo insuficiente')
-      setValorOperação('')
-      return
-    }
-
-    const historicoTemp = historico
-
-
-    historicoTemp.push({
-      cliente: seleçãoNome,
-      data: new Date().toLocaleDateString(),
-      tipo: tipoOperação,
-      valor: valorOperação
-    })
-
-    if (tipoOperação == 'TD') {
       historicoTemp.push({
-        cliente: seleçãoUsuarioTransferir,
-        data: new Date().toLocaleDateString(),
-        tipo: tiposOperação[3].valor,
+        cliente: seleçãoNome,
+        data: new Date(),
+        tipo: tipoOperação,
         valor: valorOperação
       })
+
+      if (tipoOperação == 'TD') {
+        historicoTemp.push({
+          cliente: seleçãoUsuarioTransferir,
+          data: new Date(),
+          tipo: tiposOperação[3].valor,
+          valor: valorOperação
+        })
+      }
+
+      setHistorico(historicoTemp)
+      localStorage.setItem('historico', JSON.stringify(historico))
+      setValorOperação('')
+
+    } catch (error) {
+      alert(error.message);
     }
 
-    setHistorico(historicoTemp)
-    localStorage.setItem('historico', JSON.stringify(historico))
-    setValorOperação('')
   }
-
-  function cancelarOperação() {
-    setTipoOperação('')
-    setValorOperação('')
-  }
-
 
   return (
     <div className=''>
@@ -134,7 +110,7 @@ export default function banco() {
                     onChange={e => setSeleçãoNome(e.target.value)} />
 
                   {seleçãoNome != '' && <div className='d-flex justify-content-center align-items-center p-2 my-3 text-white rounded shadow-sm bg-primary'>
-                    {seleçãoNome != '' && <h5>Saldo do cliente: {calcularSaldo(historico.filter(h => h.cliente == seleçãoNome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</h5>}
+                    <h5>Saldo do cliente: {calcularSaldo(historico.filter(h => h.cliente == seleçãoNome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</h5>
                   </div>}
                 </div>}
 
@@ -178,7 +154,7 @@ export default function banco() {
 
                     <Button
                       tipoBotao="btn btn-outline-danger"
-                      onClick={cancelarOperação}>
+                      onClick={() => cancelarOperação(setTipoOperação, setValorOperação)}>
                       Cancelar
                     </Button>
                   </div>}
@@ -190,40 +166,42 @@ export default function banco() {
             </div>
 
             {seleçãoNome != '' && <div className='col-lg-8'>
-              <div>
-                <h1 className='text-center'>Histórico de operações de {seleçãoNome}</h1>
-                {filtrarHistoricoPorData(historico.filter(h => h.cliente == seleçãoNome)).map(([data, transações]) => (
-                  <div key={data}>
-                    <h3>{data}</h3>
-                    <Table>
-                      <thead>
-                        <tr>
-                          <th>Tipo</th>
-                          <th>Valor</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transações.map((t, index) => (
-                          <tr key={index}>
-                            <td>{t.tipo == 'DP' ?
-                                  tiposOperação[0].rotulo :
-                                  t.tipo == 'SQ' ?
-                                      tiposOperação[1].rotulo :
-                                      t.tipo == 'VI' ?
-                                        tiposOperação[2].rotulo :
-                                        t.tipo == 'TC' ?
-                                          tiposOperação[3].rotulo :
-                                          t.tipo == 'TD' ?
-                                            tiposOperação[4].rotulo : tiposOperação[5].rotulo}
-                            </td>
-                            <td>{t.valor}</td>
+              <div style={{ maxHeight: '730px', maxHeight: '593.6px', overflowY: 'auto' }} className='row bg-white rounded-4 shadow-sm shadow w-220px p-3 ms-2'>
+                <h1>Histórico de operações de {seleçãoNome}</h1>
+                <div className='table-responsive'>
+                  {filtrarHistoricoPorData(historico.filter(h => h.cliente == seleçãoNome)).slice().reverse().map(([data, transações]) => (
+                    <div key={data}>
+                      <h3>{data === new Date().toLocaleDateString() ? 'Hoje' : data}</h3>
+                      <Table>
+                        <thead>
+                          <tr>
+                            <th>Tipo</th>
+                            <th>Valor</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                ))
-                }
+                        </thead>
+                        <tbody>
+                          {transações.map((t, index) => (
+                            <tr key={index}>
+                              <td>{t.tipo == 'DP' ?
+                                tiposOperação[0].rotulo :
+                                t.tipo == 'SQ' ?
+                                  tiposOperação[1].rotulo :
+                                  t.tipo == 'VI' ?
+                                    tiposOperação[2].rotulo :
+                                    t.tipo == 'TC' ?
+                                      tiposOperação[3].rotulo :
+                                      t.tipo == 'TD' ?
+                                        tiposOperação[4].rotulo : tiposOperação[5].rotulo}
+                              </td>
+                              <td>{parseFloat(t.valor).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                  ))
+                  }
+                </div>
               </div>
             </div>}
 
