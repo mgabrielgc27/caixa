@@ -1,14 +1,15 @@
+import { realizarOperação } from "./banco"
+
 export const cadastrarCliente = (listaClientes, nomeCliente, historico, tiposOperação, setHistorico, setListaClientes, setNomeCliente) => {
 
     const listaFiltrada = listaClientes.filter(lista => lista.nome == nomeCliente)
     if (listaFiltrada.length > 0) {
-        alert('Usuário existente')
-        return
+        throw new Error('Usuário existente');
+        
     }
 
     if (!nomeCliente) {
-        alert('Digite um nome válido')
-        return
+        throw new Error('Digite um nome válido');
     }
 
     const clientes = listaClientes
@@ -17,17 +18,9 @@ export const cadastrarCliente = (listaClientes, nomeCliente, historico, tiposOpe
         nome: nomeCliente
     })
 
-    const historicoTemp = historico
-
-    historicoTemp.push({
-        cliente: nomeCliente,
-        data: new Date(),
-        tipo: tiposOperação[2].valor,
-        valor: 1000
-    })
+    const historicoTemp = realizarOperação(historico, nomeCliente, tiposOperação[2].valor, 1000, tiposOperação, '')
 
     setHistorico(historicoTemp);
-
     setListaClientes(clientes)
     setNomeCliente('')
     localStorage.setItem('listaClientes', JSON.stringify(listaClientes))

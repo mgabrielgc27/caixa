@@ -5,7 +5,24 @@ import Select from '../../components/select';
 import Button from '../../components/button';
 import Header from '../../components/header';
 import Table from '../../components/table';
-import { calcularSaldo } from '../../service/banco'
+import { calcularSaldo, realizarOperação } from '../../service/banco'
+import { 
+    aceitarPerguntaAleatoria,
+    cancelar, 
+    cartas, 
+    clicarAlternativa, 
+    começarJogo, 
+    comprarAjudaCartas, 
+    comprarAjudaConvidados, 
+    convidados, 
+    inicializandoPerguntasJogo, 
+    organizarRanking, 
+    parar, 
+    passarPerguntas, 
+    pularPergunta, 
+    pularPerguntaAleatoria, 
+    verificarInputs 
+} from '../../service/jogo';
 
 
 export default function jogo() {
@@ -113,8 +130,6 @@ export default function jogo() {
 
     }, [rodada, pulos])
 
-
-
     useEffect(() => {
         if (rodada === numeroRodadaAleatoria) {
             console.log('Pergunta aleatoria', perguntaAleatoria)
@@ -127,362 +142,60 @@ export default function jogo() {
         }
     }, [listaPerguntasJogo])
 
-
     useEffect(() => {
-        cancelar()
+        cancelar(setConfirmandoJogo)
     }, [modoJogo, seleçãoNome])
 
-
-    const embaralharLista = (lista) => {
-        for (let i = lista.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            [lista[i], lista[j]] = [lista[j], lista[i]];
-        }
-        return lista
-    }
-
     const verPerguntas = () => {
-        if (seleçãoNome == '') {
-            alert('Escolha um usuário')
-            return
-        }
+        try {
+            verificarInputs(seleçãoNome, modoJogo)
 
-        if (modoJogo == '') {
-            alert('Escolha um modo')
-            return
-        }
+            setConfirmandoJogo(true)
 
-        setConfirmandoJogo(true)
+            const number = Math.floor((Math.random() * (RODADA_DIFICIL - 1)) + 1)
+            setNumeroRodadaAleatoria(number)
 
-        const number = Math.floor((Math.random() * (RODADA_DIFICIL - 1)) + 1)
-        setNumeroRodadaAleatoria(number)
-
-        inicializandoPerguntasJogo()
-
-    }
-
-    const inicializandoPerguntasJogo = () => {
-
-        let faceis = listaPerguntas.filter(l => l.dificuldade == 'FÁCIL')
-        let intermediarias = listaPerguntas.filter(l => l.dificuldade == 'INTERMEDIÁRIO')
-        let dificeis = listaPerguntas.filter(l => l.dificuldade == 'DIFÍCIL')
-
-        if (modoJogo == 'Categoria matemática') {
-            faceis = faceis.filter(l => l.categoria === "MATEMÁTICA")
-            intermediarias = intermediarias.filter(l => l.categoria === "MATEMÁTICA")
-            dificeis = dificeis.filter(l => l.categoria === "MATEMÁTICA")
-        } else if (modoJogo == 'Categoria português') {
-            faceis = faceis.filter(l => l.categoria === "PORTUGUÊS")
-            intermediarias = intermediarias.filter(l => l.categoria === "PORTUGUÊS")
-            dificeis = dificeis.filter(l => l.categoria === "PORTUGUÊS")
-        } else if (modoJogo == 'Categoria conhecimentos gerais') {
-            faceis = faceis.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
-            intermediarias = intermediarias.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
-            dificeis = dificeis.filter(l => l.categoria === "CONHECIMENTOS GERAIS")
-        }
-
-        embaralharLista(faceis)
-        embaralharLista(intermediarias)
-        embaralharLista(dificeis)
-
-        setlistaPerguntasJogo([...faceis, ...intermediarias, ...dificeis])
-
-        if (faceis.length < QUANT_PERGUNTAS_FACEIS) {
-            alert('registre mais perguntas faceis')
-            return
-        }
-
-        if (intermediarias.length < QUANT_PERGUNTAS_INTERMEDIARIAS) {
-            alert('registre mais perguntas intermediarias')
-            return
-        }
-
-        if (dificeis.length < QUANT_PERGUNTAS_DIFICEIS) {
-            alert('registre mais perguntas dificeis')
-            return
+            inicializandoPerguntasJogo
+                (listaPerguntas, modoJogo, setlistaPerguntasJogo, QUANT_PERGUNTAS_FACEIS, QUANT_PERGUNTAS_INTERMEDIARIAS, QUANT_PERGUNTAS_DIFICEIS)
+        } catch (error) {
+            alert(error.message)
         }
     }
 
-    const cancelar = () => {
-        setConfirmandoJogo(false)
+    const ajudaCartas = () => {
+        alert(cartas(modoJogo, perguntaAtual, alternativasIsDisable, setAlternativasIsDisable, setCartasIsDisable))
     }
 
-    const começarJogo = () => {
-
-        setConfirmandoJogo(false)
-        setRodada(rodada + 1)
-        setJogando(true)
-
-        setPerguntaAtual(listaPerguntasJogo[0])
-        alert('Jogando')
+    const ajudaConvidados = () => {
+        alert(convidados(modoJogo, setConvidadosIsDisable))
     }
+    // const acertou = () => {
+    //     alert(acertouPergunta(rodada, numeroRodadaAleatoria, setPontuaçãoPerguntaAleatoria, PONTOS, setRodada, RODADA_DIFICIL, pontuaçãoPerguntaAleatoria))
+    // }
 
-    function clicarAlternativa(alternativa) {
-        if (perguntaAtual.alternativas[alternativa] == perguntaAtual.resposta) {
-            acertou()
-            return
-        }
-        errou()
+    // function errou() {
+    //     alert(errouPergunta(modoJogo, setRodada, rodada))
+    // }
+    
 
-    }
-
-    function ajudaCartas() {
-        if (modoJogo != 'Modo treinamento')
-            setCartasIsDisable(true);
-
-        const numberRandom1 = Math.floor((Math.random() * 4) + 1)
-
-        const indexResposta = perguntaAtual.alternativas.findIndex(a => a === perguntaAtual.resposta)
-        const alternativasIsDisableTemp = alternativasIsDisable.filter((a, index) => index != indexResposta)
-
-        if (numberRandom1 === 1) {
-            alert('Você conseguiu um Rei, nenhuma alternativa será eliminada')
-            return
-
-        } else if (numberRandom1 === 2) {
-            alert('Você conseguiu um Ás, uma alternativa será eliminada')
-
-            const numberRandom2 = Math.floor((Math.random() * 3))
-            console.log(numberRandom2)
-
-            alternativasIsDisableTemp[numberRandom2] = true
-
-        } else if (numberRandom1 === 3) {
-            alert('Você conseguiu um 2, duas alternativas serão eliminadas')
-
-            const numberRandom3 = Math.floor((Math.random() * 3))
-
-            for (let index = 0; index < alternativasIsDisableTemp.length; index++) {
-                if (index !== numberRandom3) {
-                    alternativasIsDisableTemp[index] = true
-                }
-
-            }
-
-        } else if (numberRandom1 === 4) {
-            alert('Você conseguiu um 3, três alternativas serão eliminadas')
-
-            alternativasIsDisableTemp[0] = true
-            alternativasIsDisableTemp[1] = true
-            alternativasIsDisableTemp[2] = true
-        }
-
-        alternativasIsDisableTemp.splice(indexResposta, 0, false)
-        setAlternativasIsDisable(alternativasIsDisableTemp)
-    }
-
-    function ajudaConvidados() {
-        if (modoJogo != 'Modo treinamento')
-            setConvidadosIsDisable(true);
-
-        let percentage1 = Math.floor((Math.random() * 99) + 1);
-        let percentage2 = Math.floor((Math.random() * 99) + 1);
-        let percentage3 = Math.floor((Math.random() * 99) + 1);
-
-        let total = (percentage1 + percentage2 + percentage3 + 5);
-
-        percentage1 = (percentage1 / total) * 100;
-        percentage2 = (percentage2 / total) * 100;
-        percentage3 = (percentage3 / total) * 100;
-
-        let percentage4 = 100 - (percentage1 + percentage2 + percentage3);
-
-        alert(`Alternativa 1: ${percentage1.toFixed(2)}% - Alternativa 2: ${percentage2.toFixed(2)}%\nAlternativa 3: ${percentage3.toFixed(2)}% - Alternativa 4: ${percentage4.toFixed(2)}%`)
-    }
-
-    function pularPergunta(botaoPular) {
-        if (botaoPular === 1) {
-            if (modoJogo != 'Modo treinamento') {
-                const pular = pularIsDisable
-                pular[0] = true
-                setPularIsDisable(pular)
-            }
-        }
-        if (botaoPular === 2) {
-            if (modoJogo != 'Modo treinamento') {
-                const pular = pularIsDisable
-                pular[1] = true
-                setPularIsDisable(pular)
-            }
-        }
-        if (botaoPular === 3) {
-            if (modoJogo != 'Modo treinamento') {
-                const pular = pularIsDisable
-                pular[2] = true
-                setPularIsDisable(pular)
-            }
-        }
-
-        setPulos(pulos + 1)
-
-    }
-
-    function acertou() {
-        if (rodada === numeroRodadaAleatoria) {
-            setPontuaçãoPerguntaAleatoria(PONTOS[numeroRodadaAleatoria - 1].acertar)
-        }
-
-        setRodada(rodada + 1)
-
-        if (rodada >= RODADA_DIFICIL) {
-            alert('VOCÊ GANHOU O JOGO DO MILHÃO')
-            encerrarJogo('ganhou')
-        }
-        if (modoJogo != "Modo treinamento")
-            alert(`Você ganhou ${(PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria)} pontos`);
-        else
-            alert('Você acertou')
-
-    }
-
-    function passarPergunta() {
-        setAlternativasIsDisable([false, false, false, false])
-        if (rodada <= 1) {
-            return
-        }
-
-        let lista = [...listaPerguntasJogo]
-        if (rodada > RODADA_FACIL && rodada <= RODADA_INTERMEDIARIA) {
-            lista = lista.filter(l => l.dificuldade != 'FÁCIL')
-        } else if (rodada > RODADA_INTERMEDIARIA && rodada <= RODADA_DIFICIL) {
-            lista = lista.filter(l => l.dificuldade === 'DIFÍCIL')
-        }
-        lista = lista.filter(l => l.foiPerguntada == false)
-        setlistaPerguntasJogo(lista)
-    }
-
-    function errou() {
-        if (modoJogo != 'Modo treinamento') {
-            alert(`Você errou e saiu com ${(PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria)} pontos`)
-            encerrarJogo('perdeu')
-        } else {
-            alert('Você errou')
-            setRodada(rodada + 1)
+    const comprarAjudaCarta = () => {
+        try {
+            comprarAjudaCartas(cartasIsDisable, setCartasIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+        } catch (error) {
+            alert(error.message)
         }
     }
 
-    function parar() {
-        if (modoJogo != 'Modo treinamento')
-            alert(`Você parou com ${(PONTOS[rodada - 1].parar + pontuaçãoPerguntaAleatoria)} pontos`);
-
-        encerrarJogo('parou')
-    }
-
-    function encerrarJogo(statusJogo) {
-        if (modoJogo != 'Modo treinamento') {
-            if (statusJogo == 'ganhou') {
-                const pontos = PONTOS[rodada - 1].acertar + pontuaçãoPerguntaAleatoria;
-                guardarPontuaçãoParticipante(pontos)
-                realizarOperação(tiposOperação[0].valor, pontos)
-
-            } else if (statusJogo == 'perdeu') {
-                if (PONTOS[rodada - 1].errar != 0) {
-                    const pontos = PONTOS[rodada - 1].errar + pontuaçãoPerguntaAleatoria
-                    guardarPontuaçãoParticipante(pontos)
-                    realizarOperação(tiposOperação[0].valor, pontos)
-                }
-
-            } else if (statusJogo == 'parou') {
-                if (PONTOS[rodada - 1].parar != 0) {
-                    const pontos = PONTOS[rodada - 1].parar + pontuaçãoParticipantes
-                    guardarPontuaçãoParticipante(pontos)
-                    realizarOperação(tiposOperação[0].valor, pontos)
-                }
-            }
+    const comprarAjudaConvidado = () => {
+        try {
+            comprarAjudaConvidados(convidadosIsDisable, setConvidadosIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+        } catch (error) {
+            alert(error.message)
         }
-        setAlternativasIsDisable([false, false, false, false])
-        setJogando(false)
-        setRodada(0)
-        setPulos(0)
-        setlistaPerguntasJogo([])
-        setCartasIsDisable(false)
-        setConvidadosIsDisable(false)
-        setPularIsDisable([false, false, false])
-        setSeleçãoNome('')
     }
 
-    const comprarAjudaCartas = () => {
-
-        if (cartasIsDisable) {
-            setCartasIsDisable(false)
-
-            if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
-                alert('Saldo insuficiente')
-                return
-            }
-
-            realizarOperação('CP', '1000')
-        }
-
-    }
-
-    const comprarAjudaConvidados = () => {
-
-        if (convidadosIsDisable) {
-            setConvidadosIsDisable(false)
-
-            if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
-                alert('Saldo insuficiente')
-                return
-            }
-
-            realizarOperação('CP', '1000')
-        }
-
-    }
-
-    const guardarPontuaçãoParticipante = (pontuação) => {
-        const pontosParticipantes = pontuaçãoParticipantes
-
-        pontosParticipantes.push({
-            nome: seleçãoNome,
-            pontos: pontuação
-        })
-
-        setPontuaçãoParticipantes(pontosParticipantes)
-        localStorage.setItem('pontuaçãoParticipantes', JSON.stringify(pontuaçãoParticipantes))
-    }
-
-    const organizarRanking = (pontuações) => {
-
-        const rankingObj = pontuações.reduce((acc, pontuação) => {
-            const { nome, pontos } = pontuação;
-
-            if (!acc[nome] || pontos > acc[nome]) {
-                acc[nome] = pontos;
-            }
-
-            return acc;
-
-        }, {})
-
-        const rankingList = Object.entries(rankingObj)
-            .map(([nome, pontos]) => ({ nome, pontos }))
-            .sort((a, b) => b.pontos - a.pontos);
-
-        return rankingList;
-    }
-
-    const realizarOperação = (tipo, valor) => {
-        const historicoTemp = historico
-        historicoTemp.push({
-            cliente: seleçãoNome,
-            data: new Date(),
-            tipo: tipo,
-            valor: valor
-        })
-        setHistorico(historicoTemp)
-        localStorage.setItem('historico', JSON.stringify(historico))
-    }
-
-    const aceitarPerguntaAleatoria = () => {
-        setIsPerguntaAleatoria(false)
-    }
-
-    const pularPerguntaAleatoria = () => {
-        setNumeroRodadaAleatoria(0)
-        setIsPerguntaAleatoria(false)
-        pularPergunta(0)
+    const passarPergunta = () => {
+        passarPerguntas(setAlternativasIsDisable, rodada, listaPerguntasJogo, RODADA_FACIL, RODADA_INTERMEDIARIA, RODADA_DIFICIL, setlistaPerguntasJogo, pulos)
     }
 
     return (
@@ -564,7 +277,7 @@ export default function jogo() {
                         {confirmandoJogo && <><div className='d-flex flex-column mt-2'>
                             <Button
                                 tipoBotao="btn btn-success"
-                                onClick={começarJogo}>
+                                onClick={() => começarJogo(setConfirmandoJogo, setRodada, rodada, setJogando, setPerguntaAtual, listaPerguntasJogo)}>
                                 Começar
                             </Button>
                         </div>
@@ -572,7 +285,7 @@ export default function jogo() {
                             <div className='d-flex flex-column mt-2'>
                                 <Button
                                     tipoBotao="btn btn-outline-danger"
-                                    onClick={cancelar}>
+                                    onClick={() => cancelar(setConfirmandoJogo)}>
                                     Cancelar
                                 </Button>
                             </div></>}
@@ -636,7 +349,7 @@ export default function jogo() {
                                     <div className='d-flex flex-column mt-3'>
                                         <Button
                                             tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
-                                            onClick={aceitarPerguntaAleatoria}>
+                                            onClick={() => aceitarPerguntaAleatoria(setIsPerguntaAleatoria)}>
                                             <strong>Sim</strong>
                                         </Button>
                                     </div>
@@ -645,7 +358,7 @@ export default function jogo() {
                                     <div className='d-flex flex-column mt-3'>
                                         <Button
                                             tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
-                                            onClick={pularPerguntaAleatoria}>
+                                            onClick={() => pularPerguntaAleatoria(setNumeroRodadaAleatoria, setIsPerguntaAleatoria, modoJogo, pularIsDisable, setPularIsDisable, setPulos, pulos)}>
                                             <strong>Não</strong>
                                         </Button>
                                     </div>
@@ -668,7 +381,26 @@ export default function jogo() {
                                         <div className='d-flex flex-column mt-3'>
                                             <Button
                                                 tipoBotao="btn btn-lg btn-info border border-white border-3 rounded text-white"
-                                                onClick={parar}>
+                                                onClick={() =>
+                                                    parar(modoJogo,
+                                                        PONTOS,
+                                                        pontuaçãoPerguntaAleatoria,
+                                                        pontuaçãoParticipantes,
+                                                        setPontuaçãoParticipantes,
+                                                        historico,
+                                                        seleçãoNome,
+                                                        tiposOperação,
+                                                        setAlternativasIsDisable,
+                                                        setJogando,
+                                                        setRodada,
+                                                        setPulos,
+                                                        setlistaPerguntasJogo,
+                                                        setCartasIsDisable,
+                                                        setConvidadosIsDisable,
+                                                        setPularIsDisable,
+                                                        setSeleçãoNome,
+                                                        rodada,
+                                                        setHistorico)}>
                                                 <strong>Parar</strong>
                                             </Button>
                                         </div>
@@ -691,7 +423,30 @@ export default function jogo() {
                                             <Button
                                                 disabled={alternativasIsDisable[0]}
                                                 tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                                onClick={() => clicarAlternativa(0)}>
+                                                onClick={() => clicarAlternativa(0,
+                                                    modoJogo,
+                                                    PONTOS,
+                                                    pontuaçãoPerguntaAleatoria,
+                                                    pontuaçãoParticipantes,
+                                                    setPontuaçãoParticipantes,
+                                                    historico,
+                                                    seleçãoNome,
+                                                    tiposOperação,
+                                                    setAlternativasIsDisable,
+                                                    setJogando,
+                                                    setRodada,
+                                                    setPulos,
+                                                    setlistaPerguntasJogo,
+                                                    setCartasIsDisable,
+                                                    setConvidadosIsDisable,
+                                                    setPularIsDisable,
+                                                    setSeleçãoNome,
+                                                    rodada,
+                                                    numeroRodadaAleatoria,
+                                                    setPontuaçãoPerguntaAleatoria,
+                                                    perguntaAtual,
+                                                    RODADA_DIFICIL,
+                                                    setHistorico)}>
                                                 {perguntaAtual.alternativas[0]}
                                             </Button>
                                         </div>
@@ -702,7 +457,30 @@ export default function jogo() {
                                             <Button
                                                 disabled={alternativasIsDisable[1]}
                                                 tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                                onClick={() => clicarAlternativa(1)}>
+                                                onClick={() => clicarAlternativa(1,
+                                                    modoJogo,
+                                                    PONTOS,
+                                                    pontuaçãoPerguntaAleatoria,
+                                                    pontuaçãoParticipantes,
+                                                    setPontuaçãoParticipantes,
+                                                    historico,
+                                                    seleçãoNome,
+                                                    tiposOperação,
+                                                    setAlternativasIsDisable,
+                                                    setJogando,
+                                                    setRodada,
+                                                    setPulos,
+                                                    setlistaPerguntasJogo,
+                                                    setCartasIsDisable,
+                                                    setConvidadosIsDisable,
+                                                    setPularIsDisable,
+                                                    setSeleçãoNome,
+                                                    rodada,
+                                                    numeroRodadaAleatoria,
+                                                    setPontuaçãoPerguntaAleatoria,
+                                                    perguntaAtual,
+                                                    RODADA_DIFICIL,
+                                                    setHistorico)}>
                                                 {perguntaAtual.alternativas[1]}
                                             </Button>
                                         </div>
@@ -713,7 +491,30 @@ export default function jogo() {
                                             <Button
                                                 disabled={alternativasIsDisable[2]}
                                                 tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                                onClick={() => clicarAlternativa(2)}>
+                                                onClick={() => clicarAlternativa(2,
+                                                    modoJogo,
+                                                    PONTOS,
+                                                    pontuaçãoPerguntaAleatoria,
+                                                    pontuaçãoParticipantes,
+                                                    setPontuaçãoParticipantes,
+                                                    historico,
+                                                    seleçãoNome,
+                                                    tiposOperação,
+                                                    setAlternativasIsDisable,
+                                                    setJogando,
+                                                    setRodada,
+                                                    setPulos,
+                                                    setlistaPerguntasJogo,
+                                                    setCartasIsDisable,
+                                                    setConvidadosIsDisable,
+                                                    setPularIsDisable,
+                                                    setSeleçãoNome,
+                                                    rodada,
+                                                    numeroRodadaAleatoria,
+                                                    setPontuaçãoPerguntaAleatoria,
+                                                    perguntaAtual,
+                                                    RODADA_DIFICIL,
+                                                    setHistorico)}>
                                                 {perguntaAtual.alternativas[2]}
                                             </Button>
                                         </div>
@@ -724,7 +525,30 @@ export default function jogo() {
                                             <Button
                                                 disabled={alternativasIsDisable[3]}
                                                 tipoBotao="btn btn-lg btn-danger border-white border-5 rounded"
-                                                onClick={() => clicarAlternativa(3)}>
+                                                onClick={() => clicarAlternativa(3,
+                                                    modoJogo,
+                                                    PONTOS,
+                                                    pontuaçãoPerguntaAleatoria,
+                                                    pontuaçãoParticipantes,
+                                                    setPontuaçãoParticipantes,
+                                                    historico,
+                                                    seleçãoNome,
+                                                    tiposOperação,
+                                                    setAlternativasIsDisable,
+                                                    setJogando,
+                                                    setRodada,
+                                                    setPulos,
+                                                    setlistaPerguntasJogo,
+                                                    setCartasIsDisable,
+                                                    setConvidadosIsDisable,
+                                                    setPularIsDisable,
+                                                    setSeleçãoNome,
+                                                    rodada,
+                                                    numeroRodadaAleatoria,
+                                                    setPontuaçãoPerguntaAleatoria,
+                                                    perguntaAtual,
+                                                    RODADA_DIFICIL,
+                                                    setHistorico)}>
                                                 {perguntaAtual.alternativas[3]}
                                             </Button>
                                         </div>
@@ -809,7 +633,7 @@ export default function jogo() {
                                                     <Button
                                                         disabled={pularIsDisable[0]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
-                                                        onClick={() => pularPergunta(1)}>
+                                                        onClick={() => pularPergunta(1, modoJogo, pularIsDisable, setPularIsDisable, setPulos, pulos)}>
                                                         <i className="text-primary fa-3x fa-solid fa-right-long"></i>Pular
                                                     </Button>
                                                 </div>
@@ -820,7 +644,7 @@ export default function jogo() {
                                                     <Button
                                                         disabled={pularIsDisable[1]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
-                                                        onClick={() => pularPergunta(2)}>
+                                                        onClick={() => pularPergunta(2, modoJogo, pularIsDisable, setPularIsDisable, setPulos, pulos)}>
                                                         <i className="text-warning fa-3x fa-solid fa-right-long"></i>Pular
                                                     </Button>
                                                 </div>
@@ -831,7 +655,7 @@ export default function jogo() {
                                                     <Button
                                                         disabled={pularIsDisable[2]}
                                                         tipoBotao="btn btn-lg btn-info text-white"
-                                                        onClick={() => pularPergunta(3)}>
+                                                        onClick={() => pularPergunta(3, modoJogo, pularIsDisable, setPularIsDisable, setPulos, pulos)}>
                                                         <i className="text-danger fa-3x fa-solid fa-right-long"></i>Pular
                                                     </Button>
                                                 </div>
@@ -860,7 +684,7 @@ export default function jogo() {
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
                                                 {modoJogo != 'Modo treinamento' ?
-                                                    <><h3>{PONTOS[rodada - 1].acertar}</h3><h3>acertar</h3></> : <h5>Modo treinamento</h5>}
+                                                    <><h3>{rodada === numeroRodadaAleatoria ? (PONTOS[rodada - 1].acertar*2) : PONTOS[rodada - 1].acertar}</h3><h3>acertar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
@@ -888,7 +712,7 @@ export default function jogo() {
                                     <div className='d-flex flex-column text-white mt-3 mb-2'>
                                         <Button
                                             tipoBotao="btn btn-lg btn-success text-white"
-                                            onClick={comprarAjudaCartas}>
+                                            onClick={comprarAjudaCarta}>
                                             <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Restaurar Cartas
                                         </Button>
                                     </div>
@@ -896,7 +720,7 @@ export default function jogo() {
                                     <div className='d-flex flex-column text-white my-2'>
                                         <Button
                                             tipoBotao="btn btn-lg btn-success text-white"
-                                            onClick={comprarAjudaConvidados}>
+                                            onClick={comprarAjudaConvidado}>
                                             <h1>1000<i className="fa-solid fa-dollar-sign"></i></h1>Restaurar Convidados
                                         </Button>
                                     </div>

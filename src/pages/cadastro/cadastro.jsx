@@ -33,6 +33,14 @@ function Cliente() {
     }
   }, [])
 
+  const salvarCliente = () => {
+    try {
+      cadastrarCliente(listaClientes, nomeCliente, historico, tiposOperação, setHistorico, setListaClientes, setNomeCliente)
+    } catch (error) {
+      alert(error.message)
+    }
+  }
+
   return (
     <div className=''>
 
@@ -65,8 +73,7 @@ function Cliente() {
                 <div className='d-flex flex-column'>
                   <Button
                     tipoBotao="btn btn-success"
-                    onClick={() => cadastrarCliente(
-                      listaClientes, nomeCliente, historico, tiposOperação, setHistorico, setListaClientes, setNomeCliente)}>
+                    onClick={salvarCliente}>
                     Cadastrar
                   </Button>
 

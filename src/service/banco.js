@@ -1,3 +1,36 @@
+export const realizarOperação = (historico, seleçãoNome, tipoOperação, valorOperação, tiposOperação, seleçãoUsuarioTransferir) => {
+  const historicoTemp = historico
+  if (tipoOperação == 'TD' && seleçãoUsuarioTransferir != '') {
+    historicoTemp.push({
+      cliente: seleçãoNome,
+      destinatario: seleçãoUsuarioTransferir,
+      data: new Date().toLocaleDateString(),
+      horario: new Date().toLocaleTimeString(),
+      tipo: tipoOperação,
+      valor: valorOperação
+    })
+
+    historicoTemp.push({
+      cliente: seleçãoUsuarioTransferir,
+      remetente: seleçãoNome,
+      data: new Date().toLocaleDateString(),
+      horario: new Date().toLocaleTimeString(),
+      tipo: tiposOperação[3].valor,
+      valor: valorOperação
+    })
+  } else {
+    historicoTemp.push({
+      cliente: seleçãoNome,
+      data: new Date().toLocaleDateString(),
+      horario: new Date().toLocaleTimeString(),
+      tipo: tipoOperação,
+      valor: valorOperação
+    })
+  }
+
+  return historicoTemp
+}
+
 export const verificarInputs = (saldo, valorOperação, setValorOperação, tipoOperação,) => {
   if (isNaN(valorOperação)) {
     throw new Error('Digite um valor válido')
@@ -11,6 +44,9 @@ export const verificarInputs = (saldo, valorOperação, setValorOperação, tipo
     throw new Error('Saldo insuficiente')
   }
 
+  if(tipoOperação == 'TD' && !seleçãoUsuarioTransferir){
+    throw new Error('Escolha um usuário para receber a transferência');
+  }
 
   if (tipoOperação == 'SQ' && valorOperação > saldo) {
     throw new Error('Saldo insuficiente')

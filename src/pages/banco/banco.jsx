@@ -6,7 +6,7 @@ import Button from '../../components/button'
 import Select from '../../components/select'
 import Header from '../../components/header'
 import Menu from '../../layout/menuNav'
-import { calcularSaldo, filtrarHistoricoPorData, verificarInputs, cancelarOperação } from '../../service/banco'
+import { calcularSaldo, filtrarHistoricoPorData, verificarInputs, cancelarOperação, realizarOperação } from '../../service/banco'
 
 export default function banco() {
 
@@ -44,37 +44,22 @@ export default function banco() {
     setValorOperação('')
   }, [tipoOperação])
 
-  function realizarOperação() {
+  function cadastrarOperação() {
 
     try {
       const saldo = calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))
 
       verificarInputs(saldo, valorOperação, setValorOperação, tipoOperação)
 
-      const historicoTemp = historico
-
-      historicoTemp.push({
-        cliente: seleçãoNome,
-        data: new Date(),
-        tipo: tipoOperação,
-        valor: valorOperação
-      })
-
-      if (tipoOperação == 'TD') {
-        historicoTemp.push({
-          cliente: seleçãoUsuarioTransferir,
-          data: new Date(),
-          tipo: tiposOperação[3].valor,
-          valor: valorOperação
-        })
-      }
+      const historicoTemp = realizarOperação(historico, seleçãoNome, tipoOperação, valorOperação, tiposOperação, seleçãoUsuarioTransferir)
 
       setHistorico(historicoTemp)
       localStorage.setItem('historico', JSON.stringify(historico))
-      setValorOperação('')
 
     } catch (error) {
       alert(error.message);
+    } finally {
+      setValorOperação('')
     }
 
   }
@@ -100,7 +85,7 @@ export default function banco() {
 
                 <h3 className='text-center'>Transações</h3>
 
-                {listaClientes.length > 0 && <div className='container my-3'>
+                {listaClientes.length > 0 && <div className='container my-2'>
                   <Select
                     Nome="Selecionar cliente"
                     Id="selecionar-cliente"
@@ -109,13 +94,13 @@ export default function banco() {
                     opções={listaClientes}
                     onChange={e => setSeleçãoNome(e.target.value)} />
 
-                  {seleçãoNome != '' && <div className='d-flex justify-content-center align-items-center p-2 my-3 text-white rounded shadow-sm bg-primary'>
+                  {seleçãoNome != '' && <div className='d-flex justify-content-center align-items-center p-2 my-2 text-white rounded shadow-sm bg-primary'>
                     <h5>Saldo do cliente: {calcularSaldo(historico.filter(h => h.cliente == seleçãoNome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</h5>
                   </div>}
                 </div>}
 
 
-                {seleçãoNome != '' && <div className='container my-3'>
+                {seleçãoNome != '' && <div className='container my-2'>
                   <Select
                     Nome="Tipo de Operação"
                     Id="tipo-operação"
@@ -125,7 +110,7 @@ export default function banco() {
                     onChange={e => setTipoOperação(e.target.value)} />
                 </div>}
 
-                {tipoOperação == 'TD' && <div className='container my-3'>
+                {tipoOperação == 'TD' && <div className='container my-2'>
                   <Select
                     Nome="Transferir para qual usuário"
                     Id="selecionar-cliente"
@@ -148,7 +133,7 @@ export default function banco() {
                   {tipoOperação && <div className='d-flex flex-column'>
                     <Button
                       tipoBotao={tipoOperação == 'DP' ? "btn btn-success" : "btn btn-danger"}
-                      onClick={realizarOperação}>
+                      onClick={cadastrarOperação}>
                       {tipoOperação == 'SQ' ? 'Sacar' : tipoOperação == 'DP' ? 'Depositar' : 'Transferir'}
                     </Button>
 
@@ -175,6 +160,7 @@ export default function banco() {
                       <Table>
                         <thead>
                           <tr>
+                            <th>Horário</th>
                             <th>Tipo</th>
                             <th>Valor</th>
                           </tr>
@@ -182,6 +168,7 @@ export default function banco() {
                         <tbody>
                           {transações.map((t, index) => (
                             <tr key={index}>
+                              <td>{t.horario}</td>
                               <td>{t.tipo == 'DP' ?
                                 tiposOperação[0].rotulo :
                                 t.tipo == 'SQ' ?
@@ -189,9 +176,9 @@ export default function banco() {
                                   t.tipo == 'VI' ?
                                     tiposOperação[2].rotulo :
                                     t.tipo == 'TC' ?
-                                      tiposOperação[3].rotulo :
+                                      tiposOperação[3].rotulo + ' de ' + t.remetente :
                                       t.tipo == 'TD' ?
-                                        tiposOperação[4].rotulo : tiposOperação[5].rotulo}
+                                        tiposOperação[4].rotulo + ' para ' + t.destinatario : tiposOperação[5].rotulo}
                               </td>
                               <td>{parseFloat(t.valor).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                             </tr>
