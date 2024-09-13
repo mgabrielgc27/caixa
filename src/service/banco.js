@@ -31,7 +31,7 @@ export const realizarOperação = (historico, seleçãoNome, tipoOperação, val
   return historicoTemp
 }
 
-export const verificarInputs = (saldo, valorOperação, setValorOperação, tipoOperação,) => {
+export const verificarInputs = (saldo, valorOperação, seleçãoUsuarioTransferir, tipoOperação,) => {
   if (isNaN(valorOperação)) {
     throw new Error('Digite um valor válido')
   }
@@ -45,6 +45,8 @@ export const verificarInputs = (saldo, valorOperação, setValorOperação, tipo
   }
 
   if(tipoOperação == 'TD' && !seleçãoUsuarioTransferir){
+    console.log(tipoOperação)
+    console.log(seleçãoUsuarioTransferir)
     throw new Error('Escolha um usuário para receber a transferência');
   }
 
