@@ -1,6 +1,7 @@
 import React from 'react'
 import Menu from '../../layout/menuNav'
-import Header from '../../components/header'
+import Header from '../../components/atomos/header'
+import IconeTelaInicial from '../../components/atomos/iconeTelaInicial'
 
 export default function home() {
   return (
@@ -10,16 +11,13 @@ export default function home() {
         <Header
           titulo='Home'
           icone='fa-solid fa-house' />
-        <div className='text-center bg-white text-primary rounded-4 shadow shadow w-220px p-5'>
-          <div className='row'>
-            <i className="fa-5x fa-solid fa-door-open mt-5"></i>
 
-          </div>
-          <div className='row'>
-            <h1 className='p-4'>Seja Bem-vindo</h1>
-          </div>
-
-        </div>
+        <IconeTelaInicial
+          texto='Seja bem-vindo'
+          paddingTexto='p-3'
+          icone='fa-solid fa-door-open'
+          tamanhoIcone='fa-5x'
+          margemIcone='mt-5' />
       </div>
     </div>
   )

@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
-import Input from '../../components/input'
-import Table from '../../components/table'
-import Button from '../../components/button'
-import Header from '../../components/header'
+import Header from '../../components/atomos/header'
 import Menu from '../../layout/menuNav'
-import { calcularSaldo } from '../../service/banco'
+import FormCadastroUser from '../../components/organismos/formCadastroUser'
+import UsersTable from '../../components/organismos/usersTable'
 import { cadastrarCliente } from '../../service/cadastro'
 
 function Cliente() {
@@ -56,57 +54,19 @@ function Cliente() {
 
           <div className='row'>
 
-            <div className='col-lg-5'>
+            <FormCadastroUser
+              nomeCliente={nomeCliente}
+              setNomeCliente={setNomeCliente}
+              salvarCliente={salvarCliente} />
 
-              <div className='row bg-white rounded-4 shadow-sm shadow w-220px p-3'>
-
-                <h3 className='text-center'>Cadastro de Cliente</h3>
-
-
-                <Input
-                  Nome='Nome cliente'
-                  Id='nome-cliente'
-                  value={nomeCliente}
-                  placeholder='Digite o nome do cliente'
-                  onChange={e => setNomeCliente(e.target.value)} />
-
-                <div className='d-flex flex-column'>
-                  <Button
-                    tipoBotao="btn btn-success"
-                    onClick={salvarCliente}>
-                    Cadastrar
-                  </Button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {listaClientes.length > 0 && <div className='col-lg-7'>
-              <div>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Clientes</th>
-                      <th>Saldo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {listaClientes.map(l => {
-                      return (
-                        <tr key={l.nome}>
-                          <td>{l.nome}</td>
-                          <td>{calcularSaldo(historico.filter(h => h.cliente == l.nome)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </Table>
-              </div>
-            </div>}
+            {listaClientes.length > 0 &&
+              <UsersTable
+                listaClientes={listaClientes}
+                historico={historico} />
+            }
 
           </div>
+          
         </div>
       </div>
     </div>

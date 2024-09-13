@@ -1,6 +1,6 @@
 import React from 'react'
 import Menu from '../../layout/menuNav'
-import Header from '../../components/header'
+import Header from '../../components/atomos/header'
 import Input from '../../components/input'
 import Select from '../../components/select'
 import Button from '../../components/button'

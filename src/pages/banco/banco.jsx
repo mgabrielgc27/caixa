@@ -4,7 +4,7 @@ import Input from '../../components/input'
 import Table from '../../components/table'
 import Button from '../../components/button'
 import Select from '../../components/select'
-import Header from '../../components/header'
+import Header from '../../components/atomos/header'
 import Menu from '../../layout/menuNav'
 import { calcularSaldo, filtrarHistoricoPorData, verificarInputs, cancelarOperação, realizarOperação } from '../../service/banco'
 

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Menu from '../../layout/menuNav';
 import Select from '../../components/select';
 import Button from '../../components/button';
-import Header from '../../components/header';
+import Header from '../../components/atomos/header';
 import Table from '../../components/table';
 import { calcularSaldo, realizarOperação } from '../../service/banco'
 import { 
