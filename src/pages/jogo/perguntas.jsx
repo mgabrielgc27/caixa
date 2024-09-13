@@ -158,14 +158,14 @@ export default function perguntas() {
 
                             </div>
 
-                            {<div className='d-flex flex-column pt-4'>
+                            {/*<div className='d-flex flex-column pt-4'>
                                 <Button
                                     tipoBotao="btn btn-success"
                                     onClick={inicializarPerguntasDefault}>
                                     Cadastrar Perguntas Default
                                 </Button>
 
-                            </div>}
+                            </div>*/}
 
                         </div>
 

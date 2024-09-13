@@ -180,7 +180,8 @@ export default function jogo() {
 
     const comprarAjudaCarta = () => {
         try {
-            comprarAjudaCartas(cartasIsDisable, setCartasIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+            const historicoTemp = comprarAjudaCartas(cartasIsDisable, setCartasIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+            localStorage.setItem('historico', JSON.stringify(historicoTemp))
         } catch (error) {
             alert(error.message)
         }
@@ -188,7 +189,8 @@ export default function jogo() {
 
     const comprarAjudaConvidado = () => {
         try {
-            comprarAjudaConvidados(convidadosIsDisable, setConvidadosIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+            const historicoTemp = comprarAjudaConvidados(convidadosIsDisable, setConvidadosIsDisable, calcularSaldo, historico, seleçãoNome, tiposOperação)
+            localStorage.setItem('historico', JSON.stringify(historicoTemp))
         } catch (error) {
             alert(error.message)
         }
@@ -670,21 +672,21 @@ export default function jogo() {
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
                                                 {modoJogo != 'Modo treinamento' ?
-                                                    <><h3>{PONTOS[rodada - 1].errar}</h3><h3>errar</h3></> : <h5>Modo treinamento</h5>}
+                                                    <><h3>{PONTOS[rodada - 1].errar+pontuaçãoPerguntaAleatoria}</h3><h3>errar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
                                                 {modoJogo != 'Modo treinamento' ?
-                                                    <><h3>{PONTOS[rodada - 1].parar}</h3><h3>parar</h3></> : <h5>Modo treinamento</h5>}
+                                                    <><h3>{(PONTOS[rodada - 1].parar+pontuaçãoPerguntaAleatoria)}</h3><h3>parar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 
                                         <div className='col-lg-4'>
                                             <div className='d-flew bg-warning bg-gradient align-items-center justify-content-center border border-2 border-white rounded'>
                                                 {modoJogo != 'Modo treinamento' ?
-                                                    <><h3>{rodada === numeroRodadaAleatoria ? (PONTOS[rodada - 1].acertar*2) : PONTOS[rodada - 1].acertar}</h3><h3>acertar</h3></> : <h5>Modo treinamento</h5>}
+                                                    <><h3>{rodada === numeroRodadaAleatoria ? (PONTOS[rodada - 1].acertar*2) : (PONTOS[rodada - 1].acertar+pontuaçãoPerguntaAleatoria)}</h3><h3>acertar</h3></> : <h5>Modo treinamento</h5>}
                                             </div>
                                         </div>
 

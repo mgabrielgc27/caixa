@@ -492,8 +492,8 @@ export const comprarAjudaConvidados = (convidadosIsDisable, setConvidadosIsDisab
         if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
             throw new Error('Saldo insuficiente')
         }
-
-        realizarOperação(historico, seleçãoNome, 'CP', '1000', tiposOperação, '')
+        const historicoTemp = realizarOperação(historico, seleçãoNome, 'CP', '1000', tiposOperação, '')
+        return historicoTemp;
     }
 }
 
@@ -505,9 +505,9 @@ export const comprarAjudaCartas = (cartasIsDisable, setCartasIsDisable, calcular
         if (1000 > calcularSaldo(historico.filter(h => h.cliente == seleçãoNome))) {
             throw new Error('Saldo insuficiente')
         }
-        realizarOperação(historico, seleçãoNome, 'CP', '1000', tiposOperação)
+        const historicoTemp = realizarOperação(historico, seleçãoNome, 'CP', '1000', tiposOperação)
+        return historicoTemp;
     }
-
 }
 
 export function passarPerguntas(setAlternativasIsDisable, rodada, listaPerguntasJogo, RODADA_FACIL, RODADA_INTERMEDIARIA, RODADA_DIFICIL, setlistaPerguntasJogo, pulos) {
