@@ -3,7 +3,7 @@ import Header from '../../components/atomos/header'
 import Menu from '../../layout/menuNav'
 import FormCadastroUser from '../../components/organismos/formCadastroUser'
 import UsersTable from '../../components/organismos/usersTable'
-import { cadastrarCliente } from '../../service/cadastro'
+import { cadastrarCliente, deletar } from '../../service/cadastro'
 
 function Cliente() {
 
@@ -13,11 +13,12 @@ function Cliente() {
     { rotulo: 'Valor inicial', valor: 'VI' },
     { rotulo: 'Transferência crédito', valor: 'TC' },
     { rotulo: 'Transferência débito', valor: 'TD' },
-    { rotulo: 'Compra', valor: 'CP'}
-]
+    { rotulo: 'Compra', valor: 'CP' }
+  ]
 
   const [listaClientes, setListaClientes] = useState([])
   const [historico, setHistorico] = useState([])
+  const [pontuaçãoParticipantes, setPontuaçãoParticipantes] = useState([])
   const [nomeCliente, setNomeCliente] = useState('')
 
   useEffect(() => {
@@ -29,14 +30,50 @@ function Cliente() {
     if (hist) {
       setHistorico(hist)
     }
+    const pontos = JSON.parse(localStorage.getItem('pontuaçãoParticipantes'))
+    if (pontos) {
+      setPontuaçãoParticipantes(pontos)
+    }
   }, [])
+
+  useEffect(() => {
+    if (!listaClientes || listaClientes.length != 0) {
+      localStorage.setItem('listaClientes', JSON.stringify(listaClientes))
+    }
+  }, [listaClientes])
+
+  useEffect(() => {
+    if (!historico || historico.length != 0) {
+      localStorage.setItem('historico', JSON.stringify(historico))
+    }
+  }, [historico])
+
+  useEffect(() => {
+    if (!pontuaçãoParticipantes || pontuaçãoParticipantes.length != 0) {
+      localStorage.setItem('pontuaçãoParticipantes', JSON.stringify(pontuaçãoParticipantes))
+    }
+  }, [pontuaçãoParticipantes])
+
 
   const salvarCliente = () => {
     try {
-      cadastrarCliente(listaClientes, nomeCliente, historico, tiposOperação, setHistorico, setListaClientes, setNomeCliente)
+      const result = cadastrarCliente(listaClientes, nomeCliente, historico, tiposOperação)
+      setHistorico(result.historicoTemp);
+      setListaClientes(result.clientes)
+      setNomeCliente('')
+      localStorage.setItem('listaClientes', JSON.stringify(listaClientes))
+      localStorage.setItem('historico', JSON.stringify(historico))
     } catch (error) {
       alert(error.message)
     }
+    alert('Usuário cadastrado')
+  }
+
+  const deletarCliente = (nome) => {
+    const result = deletar(nome, listaClientes, historico, pontuaçãoParticipantes);
+    setListaClientes(result.clientes)
+    setHistorico(result.hist)
+    setPontuaçãoParticipantes(result.pontuação)
   }
 
   return (
@@ -62,11 +99,12 @@ function Cliente() {
             {listaClientes.length > 0 &&
               <UsersTable
                 listaClientes={listaClientes}
-                historico={historico} />
+                historico={historico}
+                deletar={deletarCliente} />
             }
 
           </div>
-          
+
         </div>
       </div>
     </div>

@@ -1,12 +1,13 @@
 import React from 'react'
-import Button from '../../components/button'
-import Input from '../../components/input'
+import Button from '../atomos/button'
+import Input from '../atomos/input'
+import DivRoundedShadow from '../atomos/divRoundedShadow'
 
 export default function formCadastroUser(params) {
     return (
         <div className='col-lg-5'>
 
-            <div className='row bg-white rounded-4 shadow-sm shadow w-220px p-3'>
+            <DivRoundedShadow>
 
                 <h3 className='text-center'>Cadastro de Cliente</h3>
 
@@ -25,7 +26,7 @@ export default function formCadastroUser(params) {
                     </Button>
                 </div>
 
-            </div>
+            </DivRoundedShadow>
 
         </div>
     )

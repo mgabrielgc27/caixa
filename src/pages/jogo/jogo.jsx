@@ -1,10 +1,10 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import Menu from '../../layout/menuNav';
-import Select from '../../components/select';
-import Button from '../../components/button';
-import Header from '../../components/atomos/header';
-import Table from '../../components/table';
+import Table from '../../components/atomos/table'
+import Button from '../../components/atomos/button'
+import Select from '../../components/atomos/select'
+import Header from '../../components/atomos/header'
 import { calcularSaldo, realizarOperação } from '../../service/banco'
 import { 
     aceitarPerguntaAleatoria,

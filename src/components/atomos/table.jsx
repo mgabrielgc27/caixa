@@ -2,9 +2,9 @@ import React from 'react'
 
 export default function table(params) {
     return (
-        <div>
+        <div className='table-responsive'>
             <table
-                className='table table-responsive table-striped table-hover table-bordered border-secondary' >
+                className='table table-striped table-hover' >
                 {params.children}
             </table>
         </div>
