@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react'
 import Menu from '../../layout/menuNav';
 import Table from '../../components/atomos/table'
 import Button from '../../components/atomos/button'
-import Select from '../../components/atomos/select'
 import Header from '../../components/atomos/header'
+import RankingTable from '../../components/organismos/rankingTable';
+import FormIniciarJogo from '../../components/organismos/formIniciarJogo';
 import { calcularSaldo, realizarOperação } from '../../service/banco'
 import { 
     aceitarPerguntaAleatoria,
@@ -169,14 +170,6 @@ export default function jogo() {
     const ajudaConvidados = () => {
         alert(convidados(modoJogo, setConvidadosIsDisable))
     }
-    // const acertou = () => {
-    //     alert(acertouPergunta(rodada, numeroRodadaAleatoria, setPontuaçãoPerguntaAleatoria, PONTOS, setRodada, RODADA_DIFICIL, pontuaçãoPerguntaAleatoria))
-    // }
-
-    // function errou() {
-    //     alert(errouPergunta(modoJogo, setRodada, rodada))
-    // }
-    
 
     const comprarAjudaCarta = () => {
         try {
@@ -215,82 +208,28 @@ export default function jogo() {
 
                     <div className='col-lg-6 bg-white rounded-4 shadow-sm shadow w-220px p-3'>
 
-                        {pontuaçãoParticipantes.length > 0 && <div className='row'>
-                            <div className='col-lg-6'>
-                                <div className="table-responsive" style={{ maxHeight: '164px', overflowY: 'auto' }}>
-                                    <Table>
-                                        <thead>
-                                            <tr><th>Ranking</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            {organizarRanking(pontuaçãoParticipantes).map(p => {
-                                                return (
-                                                    <tr key={p.nome}><td>{p.nome}: {p.pontos}</td></tr>
-                                                )
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </div>
-                            </div>
-                            <div className='col-lg-6'>
-                                <div className="table-responsive" style={{ maxHeight: '164px', overflowY: 'auto' }}>
-                                    <Table>
-                                        <thead>
-                                            <tr>
-                                                <th>Historico de pontuações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {pontuaçãoParticipantes.map((p, index) => {
-                                                return (
-                                                    <tr key={index}><td>{p.nome}: {p.pontos}</td></tr>
-                                                )
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </div>
-                            </div>
-                        </div>}
+                        {pontuaçãoParticipantes.length > 0 && 
+                            <RankingTable
+                                pontuaçãoParticipantes={pontuaçãoParticipantes} />
+                        }
 
-                        <Select
-                            Nome="Selecionar cliente"
-                            Id="selecionar-cliente"
-                            value={seleçãoNome}
-                            primeiroValor='Escolha o usuário'
-                            opções={listaClientes}
-                            onChange={e => setSeleçãoNome(e.target.value)} />
-
-                        {seleçãoNome && <Select
-                            Nome="Selecionar modo de jogo"
-                            Id="selecionar-modo-jogo"
-                            value={modoJogo}
-                            primeiroValor='Escolha o modo de jogo'
-                            opções={modosJogo}
-                            onChange={e => setModoJogo(e.target.value)} />}
-
-                        <div className='d-flex flex-column pt-3'>
-                            <Button
-                                tipoBotao="btn btn-primary"
-                                onClick={verPerguntas}>
-                                Ver Perguntas
-                            </Button>
-                        </div>
-
-                        {confirmandoJogo && <><div className='d-flex flex-column mt-2'>
-                            <Button
-                                tipoBotao="btn btn-success"
-                                onClick={() => começarJogo(setConfirmandoJogo, setRodada, rodada, setJogando, setPerguntaAtual, listaPerguntasJogo)}>
-                                Começar
-                            </Button>
-                        </div>
-
-                            <div className='d-flex flex-column mt-2'>
-                                <Button
-                                    tipoBotao="btn btn-outline-danger"
-                                    onClick={() => cancelar(setConfirmandoJogo)}>
-                                    Cancelar
-                                </Button>
-                            </div></>}
+                        <FormIniciarJogo
+                            seleçãoNome={seleçãoNome}
+                            listaClientes={listaClientes}
+                            setSeleçãoNome={setSeleçãoNome}
+                            modoJogo={modoJogo}
+                            modosJogo={modosJogo}
+                            setModoJogo={setModoJogo}
+                            verPerguntas={verPerguntas}
+                            começarJogo={começarJogo}
+                            setConfirmandoJogo={setConfirmandoJogo}
+                            setRodada={setRodada}
+                            rodada={rodada}
+                            setJogando={setJogando}
+                            setPerguntaAtual={setPerguntaAtual}
+                            listaPerguntasJogo={listaPerguntasJogo}
+                            cancelar={cancelar}
+                            confirmandoJogo={confirmandoJogo} />
 
                     </div>
 
