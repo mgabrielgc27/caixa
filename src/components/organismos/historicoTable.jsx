@@ -24,7 +24,7 @@ export default function historicoTable(params) {
                                             return (
                                                 
                                                 <tr key={index}>
-                                                    <td className='text-start'>{t.horario}</td>
+                                                    <td className='text-start'><i className="fa-regular fa-clock"></i> {t.horario}</td>
                                                     <td className='text-start'>{t.tipo == 'DP' ?
                                                         tiposOperação[0].rotulo :
                                                         t.tipo == 'SQ' ?
