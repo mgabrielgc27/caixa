@@ -233,47 +233,7 @@ export default function jogo() {
 
                     </div>
 
-                    {confirmandoJogo && <div style={{ maxWidth: '538px', maxHeight: '544px', overflowY: 'auto' }} className='bg-white rounded-4 shadow-sm shadow w-220px p-3 table-responsive'>
-                        <h2>Rodada da pergunta aleátoria: {numeroRodadaAleatoria}</h2>
-
-                        <Table>
-                            <thead>
-                                <tr><th>Perguntas Nível Fácil</th></tr>
-                            </thead>
-                            <tbody>
-                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'FÁCIL').map((l, index) => {
-                                    return (
-                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
-                                    )
-                                })}
-                            </tbody>
-                        </Table>
-                        <Table>
-                            <thead>
-                                <tr><th>Perguntas Nível Intermediario</th></tr>
-                            </thead>
-                            <tbody>
-                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'INTERMEDIÁRIO').map((l, index) => {
-                                    return (
-                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
-                                    )
-                                })}
-                            </tbody>
-                        </Table>
-                        <Table>
-                            <thead>
-                                <tr><th>Perguntas Nível Dificil</th></tr>
-                            </thead>
-                            <tbody>
-                                {listaPerguntasJogo.filter((l, index) => l.dificuldade == 'DIFÍCIL').map((l, index) => {
-                                    return (
-                                        <tr key={index}><td>{index + 1} - {l.pergunta} - {l.categoria}</td></tr>
-                                    )
-                                })}
-                            </tbody>
-                        </Table>
-
-                    </div>}
+                    
 
                 </div>}
 
